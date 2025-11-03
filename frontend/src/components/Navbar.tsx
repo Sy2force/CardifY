@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
-import { Menu, X, Globe, User, LogOut, CreditCard, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import { Menu, X, User, LogOut, Sun, Moon, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Globe, CreditCard } from 'lucide-react';
 import Button from './Button';
 
 const Navbar = () => {
@@ -175,6 +176,19 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
+            <Link
+              to="/dashboard"
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              {t('nav.dashboard')}
+            </Link>
+            <Link
+              to="/favorites"
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+            >
+              <Heart className="w-4 h-4 mr-1" />
+              Favoris
+            </Link>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 p-2"

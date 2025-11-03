@@ -5,10 +5,10 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
-import Register from './pages/Register';
-import Cards from './pages/Cards';
 import Dashboard from './pages/Dashboard';
-import CardDetails from './pages/CardDetails';
+import Cards from './pages/Cards';
+import Favorites from './pages/Favorites';
+import Register from './pages/Register';
 
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -51,7 +51,7 @@ function App() {
             {/* Public routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/cards" element={<Cards />} />
-            <Route path="/cards/:id" element={<CardDetails />} />
+            <Route path="/cards/:id" element={<div>Card Detail - Coming Soon</div>} />
             
             {/* Auth routes (redirect if already logged in) */}
             <Route path="/login" element={
@@ -69,6 +69,11 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/favorites" element={
+              <ProtectedRoute>
+                <Favorites />
               </ProtectedRoute>
             } />
             

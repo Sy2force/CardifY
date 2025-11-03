@@ -1,11 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Globe, Phone, Mail, MapPin, Edit, Trash2 } from 'lucide-react';
 import { Card as CardType, User } from '../types';
 import { useAuth } from '../context/AuthContext';
-import Button from './Button';
 
 interface CardProps {
   card: CardType;
@@ -16,7 +14,6 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading = false }) => {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -53,7 +50,7 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5, scale: 1.02 }}
       transition={{ duration: 0.3 }}
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden h-[650px] flex flex-col"
     >
       {/* Card Header with Image */}
       <div className="relative h-48 bg-gradient-to-br from-primary-500 to-primary-600">
@@ -128,79 +125,81 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
       </div>
 
       {/* Card Content */}
-      <div className="pt-8 p-6">
+      <div className="pt-8 p-6 flex-1 flex flex-col">
         {/* Header Info */}
-        <div className="mb-4">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+        <div className="mb-4 flex-shrink-0">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-3 leading-tight min-h-[3.5rem]" title={card.title}>
             {card.title}
           </h3>
-          <p className="text-primary-600 dark:text-primary-400 font-medium mb-2">
-            {card.subtitle}
+          <p className="text-primary-600 dark:text-primary-400 font-medium mb-3 line-clamp-3 h-12 text-sm leading-tight" title={card.subtitle || ''}>
+            {card.subtitle || 'Profession non spécifiée'}
           </p>
-          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
-            {card.description}
+          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-4 h-20 leading-relaxed" title={card.description || ''}>
+            {card.description || 'Description non disponible'}
           </p>
         </div>
 
         {/* Contact Info */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-            <Phone className="w-4 h-4 mr-2 text-primary-500" />
-            <span>{card.phone}</span>
+        <div className="space-y-3 mb-6 flex-1">
+          <div className="flex items-start text-sm text-gray-600 dark:text-gray-400 min-h-[24px]">
+            <Phone className="w-4 h-4 mr-3 text-primary-500 flex-shrink-0 mt-1" />
+            <span className="break-all leading-relaxed font-medium">{card.phone}</span>
           </div>
-          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-            <Mail className="w-4 h-4 mr-2 text-primary-500" />
-            <span className="truncate">{card.email}</span>
+          <div className="flex items-start text-sm text-gray-600 dark:text-gray-400 min-h-[24px]">
+            <Mail className="w-4 h-4 mr-3 text-primary-500 flex-shrink-0 mt-1" />
+            <span className="break-all leading-relaxed font-medium" title={card.email}>{card.email}</span>
           </div>
-          {card.web && (
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <Globe className="w-4 h-4 mr-2 text-primary-500" />
+          <div className="flex items-start text-sm text-gray-600 dark:text-gray-400 min-h-[24px]">
+            <Globe className="w-4 h-4 mr-3 text-primary-500 flex-shrink-0 mt-1" />
+            {card.web ? (
               <a
                 href={card.web}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 truncate"
+                className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 break-all leading-relaxed font-medium underline"
+                title={card.web}
               >
                 {card.web.replace(/^https?:\/\//, '')}
               </a>
-            </div>
-          )}
-          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-            <MapPin className="w-4 h-4 mr-2 text-primary-500" />
-            <span className="truncate">
+            ) : (
+              <span className="text-gray-400 dark:text-gray-500 leading-relaxed italic">Site web non spécifié</span>
+            )}
+          </div>
+          <div className="flex items-start text-sm text-gray-600 dark:text-gray-400 min-h-[24px]">
+            <MapPin className="w-4 h-4 mr-3 text-primary-500 flex-shrink-0 mt-1" />
+            <span className="leading-relaxed font-medium" title={`${card.address?.city || 'Ville non spécifiée'}, ${card.address?.country || 'Pays non spécifié'}`}>
               {card.address?.city || 'Ville non spécifiée'}, {card.address?.country || 'Pays non spécifié'}
             </span>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
               {card.likes?.length || 0} {(card.likes?.length || 0) === 1 ? 'like' : 'likes'}
             </span>
             {cardUser && (
-              <span className="text-xs text-gray-400 dark:text-gray-500">
+              <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">
                 par {cardUser.firstName} {cardUser.lastName}
               </span>
             )}
           </div>
           
-          <div className="flex space-x-2">
-            <Button
-              variant="primary"
-              size="sm"
+          {/* Boutons d'action toujours visibles */}
+          <div className="space-y-3">
+            <button
               onClick={() => navigate(`/cards/${card._id}`)}
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-base"
             >
-              {t('cards.discover')}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
+              📋 Voir Détails
+            </button>
+            <button
               onClick={() => window.open(`mailto:${card.email}`, '_blank')}
+              className="w-full border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-base"
             >
-              {t('cards.contact')}
-            </Button>
+              ✉️ Contacter
+            </button>
           </div>
         </div>
       </div>
