@@ -187,7 +187,7 @@ const Navbar = () => {
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
             >
               <Heart className="w-4 h-4 mr-1" />
-              Favoris
+              Favorites
             </Link>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}

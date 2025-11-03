@@ -29,7 +29,7 @@ const Favorites = () => {
       }
     } catch (error: any) {
       console.error('Error loading favorite cards:', error);
-      toast.error('Erreur lors du chargement des favoris');
+      toast.error('Error loading favorites');
     } finally {
       setLoading(false);
     }
@@ -49,10 +49,10 @@ const Favorites = () => {
       // Retirer la carte des favoris localement
       setFavoriteCards(prev => prev.filter(card => card._id !== cardId));
       
-      toast.success('Carte retirée des favoris', { duration: 2000 });
+      toast.success('Card removed from favorites', { duration: 2000 });
     } catch (error: any) {
       console.error('Unlike error:', error);
-      toast.error('Erreur lors de la suppression du favori');
+      toast.error('Error removing from favorites');
     } finally {
       setLikeLoading(null);
     }
@@ -76,7 +76,7 @@ const Favorites = () => {
         <div className="text-center">
           <Heart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            Connectez-vous pour voir vos favoris
+            Sign in to see your favorites
           </p>
         </div>
       </div>
@@ -95,11 +95,11 @@ const Favorites = () => {
           <div className="flex items-center justify-center mb-4">
             <Heart className="w-12 h-12 text-red-500 mr-4" />
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-              Mes Favoris
+              My Favorites
             </h1>
           </div>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-            Retrouvez toutes les cartes que vous avez aimées
+            Find all the cards you've liked
           </p>
           
           {/* Search Bar */}
@@ -109,7 +109,7 @@ const Favorites = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher dans vos favoris..."
+                  placeholder="Search in your favorites..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="form-input pl-10 w-full"
@@ -124,7 +124,7 @@ const Favorites = () => {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
             <span className="ml-2 text-gray-600 dark:text-gray-400">
-              Chargement de vos favoris...
+              Loading your favorites...
             </span>
           </div>
         ) : filteredCards.length === 0 ? (
@@ -135,12 +135,12 @@ const Favorites = () => {
           >
             <div className="text-8xl mb-6">💝</div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              {searchTerm ? 'Aucun résultat trouvé' : 'Aucun favori pour le moment'}
+              {searchTerm ? 'No results found' : 'No favorites yet'}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
               {searchTerm 
-                ? 'Essayez avec d\'autres mots-clés'
-                : 'Explorez les cartes et cliquez sur ❤️ pour les ajouter à vos favoris'
+                ? 'Try different keywords'
+                : 'Explore cards and click ❤️ to add them to your favorites'
               }
             </p>
             {!searchTerm && (
@@ -150,7 +150,7 @@ const Favorites = () => {
                 whileTap={{ scale: 0.95 }}
                 className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
               >
-                Découvrir les cartes
+                Discover Cards
               </motion.a>
             )}
           </motion.div>
@@ -165,11 +165,11 @@ const Favorites = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Vos Favoris
+                    Your Favorites
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    {filteredCards.length} carte{filteredCards.length > 1 ? 's' : ''} 
-                    {searchTerm && ` trouvée${filteredCards.length > 1 ? 's' : ''}`}
+                    {filteredCards.length} card{filteredCards.length > 1 ? 's' : ''} 
+                    {searchTerm && ` found`}
                   </p>
                 </div>
                 <Heart className="w-8 h-8 text-red-500" />
@@ -191,7 +191,7 @@ const Favorites = () => {
                   transition={{ delay: index * 0.05 }}
                   className="relative"
                 >
-                  {/* Favorite Badge */}
+                  {/* Favorite badge - shows this card is loved */}
                   <div className="absolute top-4 right-4 z-10">
                     <div className="bg-red-500 text-white p-2 rounded-full shadow-lg">
                       <Heart className="w-4 h-4 fill-current" />

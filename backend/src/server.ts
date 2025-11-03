@@ -9,13 +9,13 @@ import userRoutes from './routes/user.routes';
 import cardRoutes from './routes/card.routes';
 import { logger } from './services/logger';
 
-// Load environment variables from root .env file
+// Load environment variables from the root .env file
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3006;
 
-// Middleware
+// Configure middleware for CORS, logging, and request parsing
 app.use(cors({
   origin: ['http://localhost:3008', 'http://localhost:3000', 'http://localhost:5173'],
   credentials: true
@@ -25,7 +25,7 @@ app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// API route definitions
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Cardify API is running' });
 });
@@ -33,15 +33,15 @@ app.get('/api/health', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/cards', cardRoutes);
 
-// Error handling middleware
+// Global error handling middleware
 app.use(errorHandler);
 
-// 404 handler
+// Catch-all route for undefined endpoints
 app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Database connection
+// Connect to MongoDB and start the server
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/cardify')
   .then(() => {
     logger.info('Connected to MongoDB');

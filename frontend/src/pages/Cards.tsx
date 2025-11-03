@@ -29,12 +29,12 @@ const Cards = () => {
       const response = await cardsAPI.getAllCards(pageNum, 12);
       console.log('Cards response:', response);
       
-      // Vérifier si la réponse est valide
+      // Check if we got a valid response from the server
       if (!response) {
-        throw new Error('Aucune réponse du serveur');
+        throw new Error('No response from server');
       }
       
-      // Vérifier la structure de la réponse
+      // Verify the response structure is what we expect
       if (response.cards && Array.isArray(response.cards)) {
         if (reset) {
           setCards(response.cards);
@@ -51,16 +51,16 @@ const Cards = () => {
         setPage(pageNum);
         console.log('Cards loaded successfully, count:', response.cards.length);
       } else {
-        // Gérer le cas où les cartes ne sont pas dans le format attendu
-        console.warn('Format de réponse inattendu:', response);
+        // Handle unexpected response format gracefully
+        console.warn('Unexpected response format:', response);
         if (reset) {
           setCards([]);
         }
         setHasMore(false);
         
-        // Afficher un message informatif plutôt qu'une erreur si c'est juste qu'il n'y a pas de cartes
+        // Show informative message instead of error if there are just no cards
         if (pageNum === 1) {
-          toast('Aucune carte disponible pour le moment', { icon: 'ℹ️' });
+          toast('No cards available at the moment', { icon: 'ℹ️' });
         }
       }
     } catch (error: any) {
@@ -69,13 +69,13 @@ const Cards = () => {
       if (error.name === 'NetworkError') {
         errorMessage = error.message;
       } else if (!error.response) {
-        errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+        errorMessage = 'Unable to connect to server. Check your connection.';
       } else if (error.response.status === 404) {
-        errorMessage = 'Aucune carte trouvée.';
+        errorMessage = 'No cards found.';
       } else if (error.response.status >= 500) {
-        errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+        errorMessage = 'Server error. Please try again later.';
       } else {
-        errorMessage = error.response?.data?.message || 'Erreur lors du chargement des cartes';
+        errorMessage = error.response?.data?.message || 'Error loading cards';
       }
       toast.error(errorMessage);
       
@@ -94,7 +94,7 @@ const Cards = () => {
 
   const handleLike = async (cardId: string) => {
     if (!user) {
-      toast.error(t('cards.login_required') || 'Vous devez être connecté pour aimer une carte');
+      toast.error(t('cards.login_required') || 'You must be logged in to like a card');
       return;
     }
 
@@ -102,7 +102,7 @@ const Cards = () => {
     try {
       await cardsAPI.likeCard(cardId);
       
-      // Update the card in the local state
+      // Update the card's like status in our local state
       setCards(prev => prev.map(card => {
         if (card._id === cardId) {
           const isCurrentlyLiked = card.likes.includes(user._id);
@@ -116,17 +116,17 @@ const Cards = () => {
         return card;
       }));
       
-      // Afficher un message de succès discret
+      // Show a subtle success message to the user
       const isLiked = !cards.find(c => c._id === cardId)?.likes.includes(user._id);
-      toast.success(isLiked ? 'Carte ajoutée aux favoris' : 'Carte retirée des favoris', {
+      toast.success(isLiked ? 'Card added to favorites' : 'Card removed from favorites', {
         duration: 2000
       });
     } catch (error: any) {
       console.error('Like error:', error);
-      let errorMessage = 'Erreur lors de la mise à jour du like';
+      let errorMessage = 'Error updating like status';
       
       if (error.response?.status === 404) {
-        errorMessage = 'Carte non trouvée';
+        errorMessage = 'Card not found';
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }

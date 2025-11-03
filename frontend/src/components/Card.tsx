@@ -132,10 +132,10 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
             {card.title}
           </h3>
           <p className="text-primary-600 dark:text-primary-400 font-medium mb-3 line-clamp-3 h-12 text-sm leading-tight" title={card.subtitle || ''}>
-            {card.subtitle || 'Profession non spécifiée'}
+            {card.subtitle || 'No profession specified'}
           </p>
           <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-4 h-20 leading-relaxed" title={card.description || ''}>
-            {card.description || 'Description non disponible'}
+            {card.description || 'No description available'}
           </p>
         </div>
 
@@ -162,13 +162,13 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
                 {card.web.replace(/^https?:\/\//, '')}
               </a>
             ) : (
-              <span className="text-gray-400 dark:text-gray-500 leading-relaxed italic">Site web non spécifié</span>
+              <span className="text-gray-400 dark:text-gray-500 leading-relaxed italic">No website specified</span>
             )}
           </div>
           <div className="flex items-start text-sm text-gray-600 dark:text-gray-400 min-h-[24px]">
             <MapPin className="w-4 h-4 mr-3 text-primary-500 flex-shrink-0 mt-1" />
-            <span className="leading-relaxed font-medium" title={`${card.address?.city || 'Ville non spécifiée'}, ${card.address?.country || 'Pays non spécifié'}`}>
-              {card.address?.city || 'Ville non spécifiée'}, {card.address?.country || 'Pays non spécifié'}
+            <span className="leading-relaxed font-medium" title={`${card.address?.city || 'City not specified'}, ${card.address?.country || 'Country not specified'}`}>
+              {card.address?.city || 'City not specified'}, {card.address?.country || 'Country not specified'}
             </span>
           </div>
         </div>
@@ -181,24 +181,24 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
             </span>
             {cardUser && (
               <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">
-                par {cardUser.firstName} {cardUser.lastName}
+                by {cardUser.firstName} {cardUser.lastName}
               </span>
             )}
           </div>
           
-          {/* Boutons d'action toujours visibles */}
+          {/* Action buttons - always visible for better UX */}
           <div className="space-y-3">
             <button
               onClick={() => navigate(`/cards/${card._id}`)}
               className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-base"
             >
-              📋 Voir Détails
+              📋 View Details
             </button>
             <button
               onClick={() => window.open(`mailto:${card.email}`, '_blank')}
               className="w-full border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-base"
             >
-              ✉️ Contacter
+              ✉️ Contact
             </button>
           </div>
         </div>

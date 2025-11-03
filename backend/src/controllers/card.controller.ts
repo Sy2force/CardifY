@@ -68,14 +68,17 @@ export const getMyCards = async (req: AuthRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 12;
     const skip = (page - 1) * limit;
+    const userId = req.user?._id;
 
-    const cards = await Card.find({ user_id: req.user?._id })
+    const cards = await Card.find({ user_id: userId })
       .populate('user_id', 'firstName lastName')
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
-    const total = await Card.countDocuments({ user_id: req.user?._id });
+    console.log('User ID:', userId, 'Card User ID:', cards[0]?.user_id, 'Is Admin:', req.user?.isAdmin);
+
+    const total = await Card.countDocuments({ user_id: userId });
 
     res.json({
       message: 'My cards retrieved successfully',

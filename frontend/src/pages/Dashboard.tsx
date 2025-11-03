@@ -139,6 +139,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDeleteCard = async (cardId: string) => {
+    // Ask user to confirm before deleting - this can't be undone
     if (!window.confirm('Are you sure you want to delete this card? This action cannot be undone.')) {
       return;
     }
@@ -147,9 +148,11 @@ const Dashboard: React.FC = () => {
     try {
       await cardsAPI.deleteCard(cardId);
       toast.success('Card deleted successfully!');
+      // Refresh the card list to show the updated state
       await fetchMyCards();
     } catch (error: any) {
       console.error('Error deleting card:', error);
+      // Show user-friendly error message based on the type of error
       let errorMessage;
       if (error.name === 'NetworkError') {
         errorMessage = error.message;

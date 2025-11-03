@@ -9,6 +9,7 @@ import { Eye, EyeOff, Mail, Lock, User, Phone, CreditCard, Briefcase } from 'luc
 import { useAuth } from '../context/AuthContext';
 import { RegisterFormData } from '../types';
 import Button from '../components/Button';
+import toast from 'react-hot-toast';
 
 const registerSchema = yup.object({
   firstName: yup
@@ -63,9 +64,10 @@ const Register: React.FC = () => {
     setIsLoading(true);
     try {
       await registerUser(data);
+      toast.success('Account created successfully! You can now sign in.');
       navigate('/dashboard');
     } catch (error) {
-      // Error is handled in AuthContext
+      toast.error('Error creating account');
     } finally {
       setIsLoading(false);
     }
@@ -92,11 +94,11 @@ const Register: React.FC = () => {
             </div>
           </motion.div>
           
-          <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
-            {t('auth.register.title')}
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {t('auth.register.subtitle')}
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Create Account
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Join Cardify and create your first digital business card
           </p>
         </div>
 
@@ -243,10 +245,13 @@ const Register: React.FC = () => {
               />
               <div className="ml-3 flex items-center">
                 <Briefcase className="h-4 w-4 text-gray-400 mr-1" />
-                <label htmlFor="isBusiness" className="text-sm text-gray-700 dark:text-gray-300">
-                  {t('auth.register.isBusiness')}
-                </label>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Business Account
+                </span>
               </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Allows you to create and manage business cards
+              </p>
             </div>
             
             {isBusiness && (
@@ -277,13 +282,13 @@ const Register: React.FC = () => {
 
           {/* Login Link */}
           <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t('auth.register.login_link')}
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+              Already have an account?{' '}
               <Link
                 to="/login"
-                className="ml-1 font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+                className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
               >
-                {t('navigation.login')}
+                Sign In
               </Link>
             </p>
           </div>
