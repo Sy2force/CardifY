@@ -132,7 +132,7 @@ export const updateCard = async (req: AuthRequest, res: Response) => {
     }
 
     // Check if user owns the card or is admin
-    if (card.user_id.toString() !== userId && !req.user?.isAdmin) {
+    if (card.user_id.toString() !== userId?.toString() && !req.user?.isAdmin) {
       return res.status(403).json({ 
         message: 'Access denied. You can only update your own cards.' 
       });
@@ -167,7 +167,7 @@ export const deleteCard = async (req: AuthRequest, res: Response) => {
     }
 
     // Check if user owns the card or is admin
-    if (card.user_id.toString() !== userId && !req.user?.isAdmin) {
+    if (card.user_id.toString() !== userId?.toString() && !req.user?.isAdmin) {
       return res.status(403).json({ 
         message: 'Access denied. You can only delete your own cards.' 
       });

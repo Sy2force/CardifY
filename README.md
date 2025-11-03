@@ -1,6 +1,72 @@
 # 💼 Cardify - Plateforme de Cartes Professionnelles Multilingue
 
-Cardify est une plateforme moderne permettant de créer, gérer et partager des cartes de visite professionnelles numériques. Support complet pour le français, anglais et hébreu.
+# Cardi-fy
+
+A modern business card platform built with React, TypeScript, and Node.js.
+
+## Configuration Requise
+
+### Variables d'Environnement Frontend
+
+Créez un fichier `.env` dans le dossier `frontend/` avec le contenu suivant :
+
+```env
+VITE_API_URL=http://localhost:3006/api
+```
+
+### Variables d'Environnement Backend
+
+Copiez `.env.example` vers `.env` dans le dossier racine et ajustez les valeurs :
+
+```bash
+cp .env.example .env
+```
+
+## Démarrage Rapide
+
+1. **Installation des dépendances** :
+   ```bash
+   # Dépendances racine
+   npm install
+   
+   # Dépendances backend
+   cd backend && npm install
+   
+   # Dépendances frontend
+   cd ../frontend && npm install
+   ```
+
+2. **Configuration de la base de données** :
+   - Assurez-vous que MongoDB est démarré sur `localhost:27017`
+   - La base de données `cardify` sera créée automatiquement
+
+3. **Démarrage des services** :
+   ```bash
+   # Terminal 1 - Backend
+   cd backend && npm run dev
+   
+   # Terminal 2 - Frontend
+   cd frontend && npm run dev
+   ```
+
+4. **Accès à l'application** :
+   - Frontend : http://localhost:3008
+   - Backend API : http://localhost:3006
+
+## Résolution des Problèmes
+
+### Erreur "Impossible de se connecter au serveur"
+
+1. Vérifiez que le backend est démarré sur le port 3006
+2. Vérifiez que le fichier `.env` existe dans `frontend/` avec `VITE_API_URL=http://localhost:3006/api`
+3. Vérifiez que MongoDB est démarré
+
+### Erreur de chargement des cartes
+
+L'application inclut maintenant une gestion d'erreur robuste qui affichera des messages spécifiques selon le problème :
+- Erreur réseau : "Impossible de se connecter au serveur"
+- Service non trouvé : "Vérifiez que le serveur est démarré"
+- Erreur serveur : "Veuillez réessayer plus tard"
 
 ## ✨ Fonctionnalités
 
@@ -56,16 +122,16 @@ npm run dev
 
 L'application sera accessible sur:
 
-- Frontend: <http://localhost:3002>
-- Backend: <http://localhost:3003>
+- Frontend: <http://localhost:3008>
+- Backend: <http://localhost:3006>
 
 ## 🧪 Comptes de Démonstration
 
-| Type | Email | Mot de passe |
-|------|-------|--------------|
-| Admin | shay@cardify.com | password123 |
-| Business | sarah@example.com | password123 |
-| User | david@example.com | password123 |
+| Email | Mot de passe | Type | Statut |
+|-------|--------------|------|--------|
+| admin@cardify.com | admin123 | Admin | ✅ Fonctionnel |
+| sarah@example.com | business123 | Business | ✅ Fonctionnel |
+| john@example.com | user123 | User | ✅ Fonctionnel |
 
 ## 📁 Structure du Projet
 
@@ -267,7 +333,7 @@ cp .env.example .env
 **Variables d'environnement requises :**
 ```env
 # Configuration serveur
-PORT=3001
+PORT=3006
 NODE_ENV=development
 
 # Base de données MongoDB
@@ -277,7 +343,7 @@ MONGO_URI=mongodb://localhost:27017/cardify
 JWT_SECRET=votre-secret-jwt-super-securise
 
 # URL du client frontend
-CLIENT_URL=http://localhost:3000
+CLIENT_URL=http://localhost:3008
 
 # Niveau de log
 LOG_LEVEL=info
@@ -295,8 +361,8 @@ npm run seed
 npm run dev
 
 # OU démarrer séparément :
-npm run dev:backend   # Backend sur http://localhost:3001
-npm run dev:frontend  # Frontend sur http://localhost:3000
+npm run dev:backend   # Backend sur http://localhost:3006
+npm run dev:frontend  # Frontend sur http://localhost:3008
 ```
 
 ## 📊 Structure MongoDB
@@ -409,11 +475,11 @@ i18n.changeLanguage('en'); // 'fr', 'en', 'he'
 
 Après avoir exécuté `npm run seed`, vous aurez accès à :
 
-| Email | Mot de passe | Rôle |
-|-------|--------------|------|
-| shay@cardify.com | password123 | Admin + Business |
-| sarah@example.com | password123 | Business |
-| david@example.com | password123 | User |
+| Email | Mot de passe | Type | Statut |
+|-------|--------------|------|--------|
+| admin@cardify.com | admin123 | Admin | ✅ Fonctionnel |
+| sarah@example.com | business123 | Business | ✅ Fonctionnel |
+| john@example.com | user123 | User | ✅ Fonctionnel |
 
 ## 📋 Scripts Disponibles
 
@@ -462,7 +528,7 @@ npm start
 ### Variables d'environnement production
 ```env
 NODE_ENV=production
-PORT=3001
+PORT=3006
 MONGO_URI=mongodb+srv://...
 JWT_SECRET=super-secret-production-key
 CLIENT_URL=https://votre-domaine.com
@@ -481,13 +547,13 @@ CLIENT_URL=https://votre-domaine.com
 2. **Port déjà utilisé**
    ```bash
    # Changer le port dans .env
-   PORT=3002
+   PORT=3006
    ```
 
 3. **Erreur CORS**
    ```bash
    # Vérifiez CLIENT_URL dans .env backend
-   CLIENT_URL=http://localhost:3000
+   CLIENT_URL=http://localhost:3008
    ```
 
 ## 🤝 Contribution

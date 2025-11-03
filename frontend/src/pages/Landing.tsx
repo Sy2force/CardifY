@@ -12,25 +12,25 @@ const Landing: React.FC = () => {
   const features = [
     {
       icon: Zap,
-      title: t('landing.features.feature1.title'),
-      description: t('landing.features.feature1.description'),
+      title: t('landing.features.feature1.title') || 'Création rapide',
+      description: t('landing.features.feature1.description') || 'Créez votre carte professionnelle en quelques minutes',
     },
     {
       icon: Palette,
-      title: t('landing.features.feature2.title'),
-      description: t('landing.features.feature2.description'),
+      title: t('landing.features.feature2.title') || 'Design personnalisé',
+      description: t('landing.features.feature2.description') || 'Personnalisez votre carte avec vos couleurs et votre style',
     },
     {
       icon: Share2,
-      title: t('landing.features.feature3.title'),
-      description: t('landing.features.feature3.description'),
+      title: t('landing.features.feature3.title') || 'Partage facile',
+      description: t('landing.features.feature3.description') || 'Partagez votre carte digitale en un clic',
     },
   ];
 
   const stats = [
-    { icon: CreditCard, value: '1000+', label: t('stats.cardsCreated') },
-    { icon: Users, value: '500+', label: t('stats.professionalsConnected') },
-    { icon: Globe, value: '3', label: t('stats.languagesSupported') },
+    { icon: CreditCard, value: '1000+', label: t('stats.cardsCreated') || 'Cartes créées' },
+    { icon: Users, value: '500+', label: t('stats.professionalsConnected') || 'Professionnels connectés' },
+    { icon: Globe, value: '3', label: t('stats.languagesSupported') || 'Langues supportées' },
   ];
 
   return (

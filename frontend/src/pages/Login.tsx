@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
@@ -159,17 +159,6 @@ const Login: React.FC = () => {
             </Button>
           </div>
 
-          {/* Demo Accounts */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-            <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">
-              🧪 Comptes de démonstration
-            </h3>
-            <div className="space-y-1 text-xs text-blue-700 dark:text-blue-300">
-              <div><strong>Admin:</strong> shay@cardify.com / password123</div>
-              <div><strong>Business:</strong> sarah@example.com / password123</div>
-              <div><strong>User:</strong> david@example.com / password123</div>
-            </div>
-          </div>
 
           {/* Register Link */}
           <div className="text-center">
@@ -196,9 +185,9 @@ const Login: React.FC = () => {
             🧪 Comptes de démonstration
           </h3>
           <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-            <div><strong>Admin:</strong> shay@cardify.com / password123</div>
-            <div><strong>Business:</strong> sarah@example.com / password123</div>
-            <div><strong>User:</strong> david@example.com / password123</div>
+            <div><strong>Admin:</strong> admin@cardify.com / admin123</div>
+            <div><strong>Business:</strong> sarah@example.com / business123</div>
+            <div><strong>User:</strong> john@example.com / user123</div>
           </div>
         </motion.div>
       </motion.div>

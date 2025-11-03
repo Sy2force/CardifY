@@ -1,8 +1,7 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreditCard, Heart } from 'lucide-react';
 
-const Footer: React.FC = () => {
+const Footer = () => {
   const { t } = useTranslation();
 
   return (

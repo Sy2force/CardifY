@@ -1,109 +1,62 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import path from 'path';
+import bcrypt from 'bcryptjs';
 import User from '../models/user.model';
 import Card from '../models/card.model';
 import { logger } from '../services/logger';
+import { createProjectCards } from './project-cards';
 
-dotenv.config();
-
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/cardify');
-    console.log('Connected to MongoDB');
-  } catch (error) {
-    console.error('Database connection error:', error);
-    process.exit(1);
-  }
-};
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 const seedData = async () => {
   try {
+    // Connect to MongoDB
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/cardify');
+    logger.info('Connected to MongoDB for seeding');
+
     // Clear existing data
     await User.deleteMany({});
     await Card.deleteMany({});
-    
-    console.log('🗑️  Cleared existing data');
+    logger.info('Cleared existing data');
 
-    // Create users
+    // Create demo users with properly hashed passwords
     const users = [
       {
-        firstName: 'Shay',
-        lastName: 'Acoca',
-        email: 'shay@cardify.com',
-        password: 'password123',
-        phone: '+972501234567',
-        isAdmin: true,
-        isBusiness: true
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@cardify.com',
+        password: await bcrypt.hash('admin123', 10),
+        phone: '+1234567890',
+        isBusiness: true,
+        isAdmin: true
       },
       {
         firstName: 'Sarah',
         lastName: 'Cohen',
         email: 'sarah@example.com',
-        password: 'password123',
-        phone: '+33123456789',
+        password: await bcrypt.hash('business123', 10),
+        phone: '+1987654321',
         isBusiness: true
       },
       {
-        firstName: 'David',
-        lastName: 'Martin',
-        email: 'david@example.com',
-        password: 'password123',
-        phone: '+1555123456',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: await bcrypt.hash('user123', 10),
+        phone: '+1122334455',
         isBusiness: false
       }
     ];
 
-    // Create users one by one to trigger pre-save hooks for password hashing
-    const createdUsers = [];
-    for (const userData of users) {
-      const user = new User(userData);
-      await user.save();
-      createdUsers.push(user);
-    }
-    console.log('👥 Created users:', createdUsers.length);
+    const createdUsers = await User.insertMany(users);
+    logger.info(`Created ${createdUsers.length} demo users`);
 
-    // Create cards
+    // Create demo cards for business users
+    const businessUsers = createdUsers.filter((user: any) => user.isBusiness);
+    
     const cards = [
-      {
-        title: 'Shay Acoca',
-        subtitle: 'Développeur Full-Stack',
-        description: 'Je crée des interfaces fluides qui connectent les gens aux idées. Expert React, Node.js et MongoDB.',
-        phone: '+972501234567',
-        email: 'shay@cardify.com',
-        web: 'https://shayacoca.dev',
-        image: {
-          url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
-          alt: 'Shay Acoca - Full-Stack Developer'
-        },
-        address: {
-          country: 'Israel',
-          city: 'Tel Aviv',
-          street: 'Rothschild Boulevard',
-          houseNumber: '15',
-          zip: '6578001'
-        },
-        user_id: createdUsers[0]._id
-      },
-      {
-        title: 'Sarah Cohen',
-        subtitle: 'Designeuse UX/UI',
-        description: 'Passionnée par la création d\'expériences utilisateur exceptionnelles. Spécialisée en design système et prototypage.',
-        phone: '+33123456789',
-        email: 'sarah@example.com',
-        web: 'https://sarahcohen.design',
-        image: {
-          url: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=300&h=300&fit=crop&crop=face',
-          alt: 'Sarah Cohen - UX/UI Designer'
-        },
-        address: {
-          country: 'France',
-          city: 'Paris',
-          street: 'Avenue des Champs-Élysées',
-          houseNumber: '42',
-          zip: '75008'
-        },
-        user_id: createdUsers[1]._id
-      },
       {
         title: 'David Martin',
         subtitle: 'Consultant Marketing Digital',
@@ -122,38 +75,35 @@ const seedData = async () => {
           houseNumber: '123',
           zip: '10001'
         },
-        user_id: createdUsers[1]._id // Sarah creates this card as business user
+        user_id: businessUsers[1]._id,
+        likes: []
       }
     ];
 
     // Create cards one by one to trigger pre-save hooks
-    const createdCards = [];
-    for (const cardData of cards) {
-      const card = new Card(cardData);
-      await card.save();
-      createdCards.push(card);
-    }
-    console.log('💼 Created cards:', createdCards.length);
+    const createdCards = await Card.insertMany(cards);
+    logger.info(`Created ${createdCards.length} demo cards`);
 
-    console.log('\n🎉 Seed data created successfully!');
-    console.log('\n📝 Test Accounts:');
-    console.log('👨‍💻 Admin/Business: shay@cardify.com / password123');
-    console.log('👩‍🎨 Business: sarah@example.com / password123');
-    console.log('👤 User: david@example.com / password123');
+    // Create project cards
+    const projectCards = await createProjectCards();
+    logger.info(`Created ${projectCards.length} project cards`);
 
-    logger.info('Database seeded successfully');
+    logger.info('Database seeded successfully!');
+    console.log('\n🌱 Database seeded with demo data:');
+    console.log('👤 Demo Users:');
+    console.log('  - admin@cardify.com (password: admin123) - Admin');
+    console.log('  - sarah@example.com (password: business123) - Business User');
+    console.log('  - john@example.com (password: user123) - Regular User');
+    console.log(`🃏 ${createdCards.length + projectCards.length} total cards created`);
+    console.log(`📋 ${projectCards.length} project showcase cards added`);
+
   } catch (error) {
-    console.error('❌ Error seeding data:', error);
-    logger.error('Database seed error:', error);
+    logger.error('Seeding error:', error);
+    console.error('❌ Seeding failed:', error);
   } finally {
-    await mongoose.connection.close();
-    console.log('\n🔌 Database connection closed');
+    await mongoose.disconnect();
+    process.exit(0);
   }
 };
 
-const main = async () => {
-  await connectDB();
-  await seedData();
-};
-
-main();
+seedData();

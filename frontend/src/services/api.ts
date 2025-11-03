@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { AuthResponse, ApiResponse, LoginFormData, RegisterFormData, CardFormData } from '../types';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3003/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3006/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,6 +28,22 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data
+    });
+    
+    // Handle network errors
+    if (!error.response) {
+      // Network error or server not reachable
+      const networkError = new Error('Impossible de se connecter au serveur. Vérifiez votre connexion.');
+      networkError.name = 'NetworkError';
+      return Promise.reject(networkError);
+    }
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('cardify_token');
       localStorage.removeItem('cardify_user');

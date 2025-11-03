@@ -13,7 +13,7 @@ import { logger } from './services/logger';
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3006;
 
 // Middleware
 app.use(cors({

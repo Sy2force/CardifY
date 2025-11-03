@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Menu, X, Globe, User, LogOut, CreditCard } from 'lucide-react';
+import { Menu, X, Globe, User, LogOut, CreditCard, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import Button from './Button';
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setIsLangDropdownOpen(false);
+    };
+    
+    if (isLangDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [isLangDropdownOpen]);
 
   const languages = [
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
@@ -75,14 +89,28 @@ const Navbar: React.FC = () => {
 
           {/* Right side */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <motion.button
+              onClick={toggleTheme}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center justify-center w-10 h-10 rounded-md text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </motion.button>
+
             {/* Language Dropdown */}
             <div className="relative">
               <button
-                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLangDropdownOpen(!isLangDropdownOpen);
+                }}
                 className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
               >
                 <Globe className="w-4 h-4" />
-                <span>{languages.find(lang => lang.code === i18n.language)?.flag}</span>
+                <span>{languages.find(lang => lang.code === i18n.language)?.flag || '🌐'}</span>
               </button>
               
               {isLangDropdownOpen && (
@@ -180,6 +208,17 @@ const Navbar: React.FC = () => {
           </div>
           
           <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+            {/* Theme Toggle Mobile */}
+            <div className="px-2 pb-3">
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+              >
+                {isDark ? <Sun className="w-5 h-5 mr-3" /> : <Moon className="w-5 h-5 mr-3" />}
+                {isDark ? 'Mode clair' : 'Mode sombre'}
+              </button>
+            </div>
+
             {user ? (
               <div className="px-2 space-y-3">
                 <div className="flex items-center px-3">

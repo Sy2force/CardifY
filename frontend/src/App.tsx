@@ -1,6 +1,6 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Landing from './pages/Landing';
@@ -11,7 +11,7 @@ import Dashboard from './pages/Dashboard';
 import CardDetails from './pages/CardDetails';
 
 // Protected Route component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
@@ -26,7 +26,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 // Public Route component (redirect to dashboard if already logged in)
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
@@ -42,42 +42,44 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Navbar />
-      
-      <main className="flex-grow">
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/cards" element={<Cards />} />
-          <Route path="/cards/:id" element={<CardDetails />} />
-          
-          {/* Auth routes (redirect if already logged in) */}
-          <Route path="/login" element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } />
-          <Route path="/register" element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          } />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </main>
-      
-      <Footer />
-    </div>
+    <ThemeProvider>
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+        <Navbar />
+        
+        <main className="flex-grow">
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/cards" element={<Cards />} />
+            <Route path="/cards/:id" element={<CardDetails />} />
+            
+            {/* Auth routes (redirect if already logged in) */}
+            <Route path="/login" element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } />
+            <Route path="/register" element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            } />
+            
+            {/* Protected routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </main>
+        
+        <Footer />
+      </div>
+    </ThemeProvider>
   );
 }
 

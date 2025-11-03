@@ -26,7 +26,7 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
     ? (card.user_id as User)._id === user._id 
     : false;
   
-  const isLiked = user ? card.likes.includes(user._id) : false;
+  const isLiked = user ? card.likes?.includes(user._id) || false : false;
   const cardUser = typeof card.user_id === 'object' ? card.user_id as User : null;
 
   const handleLike = () => {
@@ -168,7 +168,7 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
           <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
             <MapPin className="w-4 h-4 mr-2 text-primary-500" />
             <span className="truncate">
-              {card.address.city}, {card.address.country}
+              {card.address?.city || 'Ville non spécifiée'}, {card.address?.country || 'Pays non spécifié'}
             </span>
           </div>
         </div>
@@ -177,7 +177,7 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
         <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {card.likes.length} {card.likes.length === 1 ? 'like' : 'likes'}
+              {card.likes?.length || 0} {(card.likes?.length || 0) === 1 ? 'like' : 'likes'}
             </span>
             {cardUser && (
               <span className="text-xs text-gray-400 dark:text-gray-500">

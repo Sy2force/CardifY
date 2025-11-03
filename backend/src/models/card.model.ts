@@ -3,8 +3,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ICard extends Document {
   _id: string;
   title: string;
-  subtitle: string;
-  description: string;
+  subtitle?: string;
+  description?: string;
   phone: string;
   email: string;
   web?: string;
@@ -12,12 +12,12 @@ export interface ICard extends Document {
     url?: string;
     alt?: string;
   };
-  address: {
+  address?: {
     state?: string;
-    country: string;
-    city: string;
-    street: string;
-    houseNumber: string;
+    country?: string;
+    city?: string;
+    street?: string;
+    houseNumber?: string;
     zip?: string;
   };
   bizNumber: number;
@@ -37,14 +37,12 @@ const CardSchema: Schema = new Schema({
   },
   subtitle: {
     type: String,
-    required: [true, 'Subtitle is required'],
     minlength: 2,
     maxlength: 100,
     trim: true
   },
   description: {
     type: String,
-    required: [true, 'Description is required'],
     minlength: 2,
     maxlength: 1000,
     trim: true
@@ -81,25 +79,21 @@ const CardSchema: Schema = new Schema({
     },
     country: {
       type: String,
-      required: [true, 'Country is required'],
       minlength: 2,
       maxlength: 50
     },
     city: {
       type: String,
-      required: [true, 'City is required'],
       minlength: 2,
       maxlength: 50
     },
     street: {
       type: String,
-      required: [true, 'Street is required'],
       minlength: 2,
       maxlength: 100
     },
     houseNumber: {
       type: String,
-      required: [true, 'House number is required'],
       minlength: 1,
       maxlength: 20
     },

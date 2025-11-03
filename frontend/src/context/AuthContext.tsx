@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User } from '../types';
 import { authAPI } from '../services/api';
@@ -23,7 +23,7 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -31,27 +31,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initAuth = async () => {
-      const savedToken = localStorage.getItem('cardify_token');
-      const savedUser = localStorage.getItem('cardify_user');
+      try {
+        const savedToken = localStorage.getItem('cardify_token');
+        const savedUser = localStorage.getItem('cardify_user');
 
-      if (savedToken && savedUser) {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-        
-        // Verify token is still valid
-        try {
-          const response = await authAPI.getProfile();
-          setUser(response.user!);
-        } catch (error) {
-          // Token is invalid, clear auth data
-          localStorage.removeItem('cardify_token');
-          localStorage.removeItem('cardify_user');
-          setToken(null);
-          setUser(null);
+        if (savedToken && savedUser) {
+          setToken(savedToken);
+          
+          try {
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+            
+            // Verify token is still valid
+            const response = await authAPI.getProfile();
+            if (response.user) {
+              setUser(response.user);
+              localStorage.setItem('cardify_user', JSON.stringify(response.user));
+            }
+          } catch (parseError) {
+            console.error('Error parsing saved user:', parseError);
+            // Clear invalid data
+            localStorage.removeItem('cardify_token');
+            localStorage.removeItem('cardify_user');
+            setToken(null);
+            setUser(null);
+          }
         }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        // Clear auth data on any error
+        localStorage.removeItem('cardify_token');
+        localStorage.removeItem('cardify_user');
+        setToken(null);
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     initAuth();
@@ -69,7 +84,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       toast.success(t('common.login_success'));
     } catch (error: any) {
-      const message = error.response?.data?.message || t('common.login_error');
+      let message;
+      if (error.name === 'NetworkError') {
+        message = error.message;
+      } else {
+        message = error.response?.data?.message || t('common.login_error');
+      }
       toast.error(message);
       throw error;
     }
@@ -87,7 +107,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       toast.success(t('common.register_success'));
     } catch (error: any) {
-      const message = error.response?.data?.message || t('common.register_error');
+      let message;
+      if (error.name === 'NetworkError') {
+        message = error.message;
+      } else {
+        message = error.response?.data?.message || t('common.register_error');
+      }
       toast.error(message);
       throw error;
     }

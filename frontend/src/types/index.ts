@@ -12,10 +12,10 @@ export interface User {
 
 export interface Address {
   state?: string;
-  country: string;
-  city: string;
-  street: string;
-  houseNumber: string;
+  country?: string;
+  city?: string;
+  street?: string;
+  houseNumber?: string;
   zip?: string;
 }
 
@@ -27,13 +27,13 @@ export interface CardImage {
 export interface Card {
   _id: string;
   title: string;
-  subtitle: string;
-  description: string;
+  subtitle?: string;
+  description?: string;
   phone: string;
   email: string;
   web?: string;
   image?: CardImage;
-  address: Address;
+  address?: Address;
   bizNumber: number;
   likes: string[];
   user_id: string | User;
@@ -78,11 +78,11 @@ export interface RegisterFormData {
 
 export interface CardFormData {
   title: string;
-  subtitle: string;
-  description: string;
+  subtitle?: string;
+  description?: string;
   phone: string;
   email: string;
   web?: string;
   image?: CardImage;
-  address: Address;
+  address?: Address;
 }

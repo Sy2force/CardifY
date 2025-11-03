@@ -5,6 +5,8 @@
   "description": "Modern multilingual business card platform",
   "main": "index.js",
   "scripts": {
+    "start": "node start.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",

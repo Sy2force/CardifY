@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Search, Plus, Loader2 } from 'lucide-react';
@@ -10,7 +10,7 @@ import Button from '../components/Button';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-const Cards: React.FC = () => {
+const Cards = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -29,7 +29,13 @@ const Cards: React.FC = () => {
       const response = await cardsAPI.getAllCards(pageNum, 12);
       console.log('Cards response:', response);
       
-      if (response && response.cards && Array.isArray(response.cards)) {
+      // Vérifier si la réponse est valide
+      if (!response) {
+        throw new Error('Aucune réponse du serveur');
+      }
+      
+      // Vérifier la structure de la réponse
+      if (response.cards && Array.isArray(response.cards)) {
         if (reset) {
           setCards(response.cards);
         } else {
@@ -45,19 +51,37 @@ const Cards: React.FC = () => {
         setPage(pageNum);
         console.log('Cards loaded successfully, count:', response.cards.length);
       } else {
-        console.warn('No cards in response:', response);
-        setCards([]);
+        // Gérer le cas où les cartes ne sont pas dans le format attendu
+        console.warn('Format de réponse inattendu:', response);
+        if (reset) {
+          setCards([]);
+        }
         setHasMore(false);
+        
+        // Afficher un message informatif plutôt qu'une erreur si c'est juste qu'il n'y a pas de cartes
+        if (pageNum === 1) {
+          toast('Aucune carte disponible pour le moment', { icon: 'ℹ️' });
+        }
       }
     } catch (error: any) {
-      console.error('Cards loading error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      toast.error(error.response?.data?.message || t('cards.error_loading') || 'Erreur lors du chargement des cartes');
-      setCards([]);
+      console.error('Error loading cards:', error);
+      let errorMessage;
+      if (error.name === 'NetworkError') {
+        errorMessage = error.message;
+      } else if (!error.response) {
+        errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+      } else if (error.response.status === 404) {
+        errorMessage = 'Aucune carte trouvée.';
+      } else if (error.response.status >= 500) {
+        errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+      } else {
+        errorMessage = error.response?.data?.message || 'Erreur lors du chargement des cartes';
+      }
+      toast.error(errorMessage);
+      
+      if (reset) {
+        setCards([]);
+      }
       setHasMore(false);
     } finally {
       setLoading(false);
@@ -70,7 +94,7 @@ const Cards: React.FC = () => {
 
   const handleLike = async (cardId: string) => {
     if (!user) {
-      toast.error(t('cards.login_required'));
+      toast.error(t('cards.login_required') || 'Vous devez être connecté pour aimer une carte');
       return;
     }
 
@@ -91,8 +115,23 @@ const Cards: React.FC = () => {
         }
         return card;
       }));
+      
+      // Afficher un message de succès discret
+      const isLiked = !cards.find(c => c._id === cardId)?.likes.includes(user._id);
+      toast.success(isLiked ? 'Carte ajoutée aux favoris' : 'Carte retirée des favoris', {
+        duration: 2000
+      });
     } catch (error: any) {
-      toast.error(error.response?.data?.message || t('common.error'));
+      console.error('Like error:', error);
+      let errorMessage = 'Erreur lors de la mise à jour du like';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'Carte non trouvée';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLikeLoading(null);
     }
@@ -105,11 +144,20 @@ const Cards: React.FC = () => {
     }
   };
 
-  const filteredCards = cards.filter(card =>
-    card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.subtitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCards = cards.filter(card => {
+    if (!searchTerm.trim()) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      card.title?.toLowerCase().includes(searchLower) ||
+      card.subtitle?.toLowerCase().includes(searchLower) ||
+      card.description?.toLowerCase().includes(searchLower) ||
+      card.email?.toLowerCase().includes(searchLower) ||
+      card.phone?.includes(searchTerm) ||
+      card.address?.city?.toLowerCase().includes(searchLower) ||
+      card.address?.country?.toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">

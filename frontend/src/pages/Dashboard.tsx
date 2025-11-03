@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -30,12 +30,12 @@ const cardSchema = yup.object({
     .string()
     .min(2, 'Subtitle must be at least 2 characters')
     .max(100, 'Subtitle must not exceed 100 characters')
-    .required('Subtitle is required'),
+    .optional(),
   description: yup
     .string()
     .min(2, 'Description must be at least 2 characters')
     .max(1000, 'Description must not exceed 1000 characters')
-    .required('Description is required'),
+    .optional(),
   phone: yup
     .string()
     .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number')
@@ -47,15 +47,20 @@ const cardSchema = yup.object({
   web: yup
     .string()
     .url('Please enter a valid URL')
+    .transform((value) => value === '' ? undefined : value)
     .optional(),
   address: yup.object({
-    country: yup.string().min(2).max(50).required('Country is required'),
-    city: yup.string().min(2).max(50).required('City is required'),
-    street: yup.string().min(2).max(100).required('Street is required'),
-    houseNumber: yup.string().min(1).max(20).required('House number is required'),
-    state: yup.string().max(50).optional(),
-    zip: yup.string().max(10).optional(),
-  }).required(),
+    country: yup.string().min(2).max(50).transform((value) => value === '' ? undefined : value).optional(),
+    city: yup.string().min(2).max(50).transform((value) => value === '' ? undefined : value).optional(),
+    street: yup.string().min(2).max(100).transform((value) => value === '' ? undefined : value).optional(),
+    houseNumber: yup.string().min(1).max(20).transform((value) => value === '' ? undefined : value).optional(),
+    state: yup.string().max(50).transform((value) => value === '' ? undefined : value).optional(),
+    zip: yup.string().max(10).transform((value) => value === '' ? undefined : value).optional(),
+  }).transform((value) => {
+    // Si tous les champs sont vides, retourner undefined
+    const hasAnyValue = Object.values(value || {}).some(v => v !== undefined && v !== '');
+    return hasAnyValue ? value : undefined;
+  }).optional(),
   image: yup.object({
     url: yup.string().url('Please enter a valid image URL').optional(),
     alt: yup.string().max(100).optional(),
@@ -67,8 +72,9 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<CardType | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCard, setEditingCard] = useState<CardType | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
   const {
@@ -85,11 +91,74 @@ const Dashboard: React.FC = () => {
     setLoading(true);
     try {
       const response = await cardsAPI.getMyCards();
-      setCards(response.cards || []);
+      if (response && response.cards) {
+        setCards(response.cards);
+      } else {
+        setCards([]);
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Erreur lors du chargement des cartes');
+      console.error('Error fetching cards:', error);
+      let errorMessage;
+      if (error.name === 'NetworkError') {
+        errorMessage = error.message;
+      } else {
+        errorMessage = error.response?.data?.message || 'Failed to load cards';
+      }
+      toast.error(errorMessage);
+      setCards([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateCard = async (data: CardFormData) => {
+    if (!editing) return;
+    
+    setFormLoading(true);
+    try {
+      const response = await cardsAPI.updateCard(editing._id, data);
+      if (response) {
+        toast.success('Card updated successfully!');
+        setEditing(null);
+        reset();
+        setIsFormOpen(false);
+        await fetchMyCards();
+      }
+    } catch (error: any) {
+      console.error('Error updating card:', error);
+      let errorMessage;
+      if (error.name === 'NetworkError') {
+        errorMessage = error.message;
+      } else {
+        errorMessage = error.response?.data?.message || 'Failed to update card';
+      }
+      toast.error(errorMessage);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleDeleteCard = async (cardId: string) => {
+    if (!window.confirm('Are you sure you want to delete this card? This action cannot be undone.')) {
+      return;
+    }
+    
+    setDeleting(cardId);
+    try {
+      await cardsAPI.deleteCard(cardId);
+      toast.success('Card deleted successfully!');
+      await fetchMyCards();
+    } catch (error: any) {
+      console.error('Error deleting card:', error);
+      let errorMessage;
+      if (error.name === 'NetworkError') {
+        errorMessage = error.message;
+      } else {
+        errorMessage = error.response?.data?.message || 'Failed to delete card';
+      }
+      toast.error(errorMessage);
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -102,7 +171,7 @@ const Dashboard: React.FC = () => {
   }, [user]);
 
   const openCreateForm = () => {
-    setEditingCard(null);
+    setEditing(null);
     reset({
       title: '',
       subtitle: '',
@@ -110,10 +179,6 @@ const Dashboard: React.FC = () => {
       phone: '',
       email: user?.email || '',
       web: '',
-      image: {
-        url: '',
-        alt: ''
-      },
       address: {
         country: '',
         city: '',
@@ -127,59 +192,63 @@ const Dashboard: React.FC = () => {
   };
 
   const openEditForm = (card: CardType) => {
-    setEditingCard(card);
+    setEditing(card);
     setValue('title', card.title);
     setValue('subtitle', card.subtitle);
     setValue('description', card.description);
     setValue('phone', card.phone);
     setValue('email', card.email);
     setValue('web', card.web || '');
-    setValue('image.url', card.image?.url || '');
-    setValue('image.alt', card.image?.alt || '');
-    setValue('address.country', card.address.country);
-    setValue('address.city', card.address.city);
-    setValue('address.street', card.address.street);
-    setValue('address.houseNumber', card.address.houseNumber);
-    setValue('address.state', card.address.state || '');
-    setValue('address.zip', card.address.zip || '');
+    setValue('address.country', card.address?.country || '');
+    setValue('address.city', card.address?.city || '');
+    setValue('address.street', card.address?.street || '');
+    setValue('address.houseNumber', card.address?.houseNumber || '');
+    setValue('address.state', card.address?.state || '');
+    setValue('address.zip', card.address?.zip || '');
     setIsFormOpen(true);
   };
 
   const closeForm = () => {
     setIsFormOpen(false);
-    setEditingCard(null);
+    setEditing(null);
     reset();
   };
 
-  const onSubmit = async (data: CardFormData) => {
+  const handleCreateCard = async (data: CardFormData) => {
+    if (!user?.isBusiness) {
+      toast.error('Only business users can create cards');
+      return;
+    }
+    
     setFormLoading(true);
     try {
-      if (editingCard) {
-        const response = await cardsAPI.updateCard(editingCard._id, data);
-        setCards(prev => prev.map(card => 
-          card._id === editingCard._id ? response.card! : card
-        ));
-        toast.success(t('card.form.success_updated'));
-      } else {
-        const response = await cardsAPI.createCard(data);
+      const response = await cardsAPI.createCard(data);
+      if (response) {
+        toast.success('Card created successfully!');
         setCards(prev => [response.card!, ...prev]);
-        toast.success(t('card.form.success_created'));
+        reset();
+        setIsFormOpen(false);
+        setEditing(null);
       }
-      closeForm();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Erreur lors de la sauvegarde');
+      console.error('Error creating card:', error);
+      let errorMessage;
+      if (error.name === 'NetworkError') {
+        errorMessage = error.message;
+      } else {
+        errorMessage = error.response?.data?.message || 'Failed to create card';
+      }
+      toast.error(errorMessage);
     } finally {
       setFormLoading(false);
     }
   };
 
-  const handleDeleteCard = async (cardId: string) => {
-    try {
-      await cardsAPI.deleteCard(cardId);
-      setCards(prev => prev.filter(card => card._id !== cardId));
-      toast.success(t('card.form.success_deleted'));
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || t('card.form.error_delete'));
+  const onSubmit = async (data: CardFormData) => {
+    if (editing) {
+      await handleUpdateCard(data);
+    } else {
+      await handleCreateCard(data);
     }
   };
 
@@ -331,6 +400,7 @@ const Dashboard: React.FC = () => {
                       card={card}
                       onEdit={openEditForm}
                       onDelete={handleDeleteCard}
+                      isLoading={deleting === card._id}
                     />
                   ))}
                 </div>
@@ -360,7 +430,7 @@ const Dashboard: React.FC = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {editingCard ? t('card.form.edit_title') : t('card.form.title')}
+                    {editing ? t('card.form.edit_title') : t('card.form.title')}
                   </h2>
                   <button
                     onClick={closeForm}
@@ -413,16 +483,6 @@ const Dashboard: React.FC = () => {
                       {errors.description && <p className="form-error">{errors.description.message}</p>}
                     </div>
 
-                    <div className="mt-4">
-                      <label className="form-label">{t('card.form.image_url_label')}</label>
-                      <input
-                        {...register('image.url')}
-                        type="url"
-                        className={`form-input ${errors.image?.url ? 'border-red-500' : ''}`}
-                        placeholder={t('placeholders.profileImage')}
-                      />
-                      {errors.image?.url && <p className="form-error">{errors.image.url.message}</p>}
-                    </div>
                   </div>
 
                   {/* Contact Info Section */}
@@ -554,7 +614,7 @@ const Dashboard: React.FC = () => {
                       loading={formLoading}
                       icon={Save}
                     >
-                      {editingCard ? t('card.form.submit_edit') : t('card.form.submit')}
+                      {editing ? t('card.form.submit_edit') : t('card.form.submit')}
                     </Button>
                   </div>
                 </form>
