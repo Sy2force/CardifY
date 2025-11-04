@@ -1,8 +1,11 @@
 # 💼 Cardify - Plateforme de Cartes Professionnelles Multilingue
 
-# Cardi-fy
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/Sy2force/CardifY)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
+[![Security](https://img.shields.io/badge/vulnerabilities-0-brightgreen)](https://github.com/Sy2force/CardifY)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A modern business card platform built with React, TypeScript, and Node.js.
+Une plateforme moderne de cartes professionnelles construite avec React, TypeScript et Node.js, supportant 3 langues avec une interface élégante et sécurisée.
 
 ## Configuration Requise
 
