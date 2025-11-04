@@ -9,8 +9,12 @@ import userRoutes from './routes/user.routes';
 import cardRoutes from './routes/card.routes';
 import { logger } from './services/logger';
 
-// Load environment variables from the root .env file
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+// Load environment variables - check multiple locations for flexibility
+if (process.env.NODE_ENV === 'production') {
+  dotenv.config(); // Use default .env in production
+} else {
+  dotenv.config({ path: path.join(__dirname, '../../.env') }); // Local development
+}
 
 const app = express();
 const PORT = process.env.PORT || 3006;
