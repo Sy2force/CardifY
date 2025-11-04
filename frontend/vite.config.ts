@@ -13,5 +13,20 @@ export default defineConfig({
         secure: false
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['framer-motion'],
+          i18n: ['react-i18next', 'i18next'],
+          forms: ['react-hook-form', 'yup'],
+          http: ['axios']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
   }
 })
