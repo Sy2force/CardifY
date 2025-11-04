@@ -2,10 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/user.model';
 import { logger } from '../services/logger';
-
-interface AuthRequest extends Request {
-  user?: IUser;
-}
+import { AuthRequest } from '../types/AuthRequest';
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -22,7 +19,16 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
       return res.status(401).json({ message: 'Invalid token.' });
     }
 
-    req.user = user;
+    req.user = {
+      _id: user._id.toString(),
+      id: user._id.toString(),
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      isAdmin: user.isAdmin,
+      isBusiness: user.isBusiness,
+      role: user.isAdmin ? 'admin' : user.isBusiness ? 'business' : 'user'
+    };
     next();
   } catch (error) {
     logger.error('Auth middleware error:', error);
@@ -43,5 +49,3 @@ export const businessMiddleware = (req: AuthRequest, res: Response, next: NextFu
   }
   next();
 };
-
-export { AuthRequest };
