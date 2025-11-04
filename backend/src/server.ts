@@ -16,8 +16,12 @@ const app = express();
 const PORT = process.env.PORT || 3006;
 
 // Configure middleware for CORS, logging, and request parsing
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.CLIENT_URL || 'https://cardify.vercel.app', 'https://cardify.vercel.app', 'https://www.cardify.vercel.app']
+  : ['http://localhost:3008', 'http://localhost:3000', 'http://localhost:5173'];
+
 app.use(cors({
-  origin: ['http://localhost:3008', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: allowedOrigins,
   credentials: true
 }));
 
