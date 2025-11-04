@@ -60,7 +60,13 @@ const CardSchema: Schema = new Schema({
   },
   web: {
     type: String,
-    match: [/^https?:\/\/.+/, 'Please enter a valid URL']
+    validate: {
+      validator: function(v: string) {
+        if (!v || v === '') return true; // Allow empty strings
+        return /^https?:\/\/.+/.test(v);
+      },
+      message: 'Please enter a valid URL'
+    }
   },
   image: {
     url: {

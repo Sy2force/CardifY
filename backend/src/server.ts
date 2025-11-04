@@ -52,8 +52,21 @@ app.use('*', (req, res) => {
 // Connect to MongoDB and start the server
 const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
 console.log('Attempting to connect to MongoDB...');
+console.log('MongoDB URI (masked):', mongoUri.replace(/\/\/.*@/, '//***:***@'));
 
-mongoose.connect(mongoUri)
+// Configure mongoose with better timeout settings
+mongoose.set('strictQuery', false);
+
+const connectWithRetry = () => {
+  mongoose.connect(mongoUri, {
+    serverSelectionTimeoutMS: 30000, // 30 seconds
+    socketTimeoutMS: 45000, // 45 seconds
+    maxPoolSize: 10,
+    minPoolSize: 5,
+    maxIdleTimeMS: 30000,
+    retryWrites: true,
+    w: 'majority'
+  })
   .then(() => {
     logger.info('Connected to MongoDB successfully');
     console.log('✅ MongoDB connected');
@@ -66,7 +79,11 @@ mongoose.connect(mongoUri)
   .catch((error) => {
     logger.error('Database connection error:', error);
     console.error('❌ MongoDB connection failed:', error.message);
-    process.exit(1);
+    console.log('Retrying connection in 5 seconds...');
+    setTimeout(connectWithRetry, 5000);
   });
+};
+
+connectWithRetry();
 
 export default app;

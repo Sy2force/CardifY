@@ -1,11 +1,15 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User, { IUser } from '../models/user.model';
-import { AuthRequest } from '../middlewares/auth';
+import User from '../models/user.model';
 import { registerSchema, loginSchema, updateUserSchema } from '../validations/user.validation';
 import { logger } from '../services/logger';
 
-const generateToken = (user: IUser): string => {
+interface AuthRequest extends Request {
+  user?: any;
+}
+
+const generateToken = (user: any): string => {
   return jwt.sign(
     { 
       _id: user._id, 
