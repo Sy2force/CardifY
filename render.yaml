@@ -5,7 +5,7 @@ services:
     plan: free
     rootDir: ./backend
     buildCommand: npm install && npm run build
-    startCommand: npm run start
+    startCommand: node dist/server.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -17,3 +17,5 @@ services:
         value: https://cardify.vercel.app
       - key: CORS_ORIGINS
         value: https://cardify.vercel.app,https://www.cardify.vercel.app
+      - key: SERVER_URL
+        value: https://cardify-backend.onrender.com

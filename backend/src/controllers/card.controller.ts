@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import Card, { ICard } from '../models/card.model';
-import { AuthRequest } from '../middlewares/auth';
+import { AuthRequest } from '../types/AuthRequest';
 import { createCardSchema, updateCardSchema } from '../validations/card.validation';
 import { logger } from '../services/logger';
 

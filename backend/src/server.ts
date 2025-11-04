@@ -5,8 +5,10 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
 import { errorHandler } from './middlewares/error';
+import { generalLimiter } from './middlewares/rateLimit';
 import userRoutes from './routes/user.routes';
 import cardRoutes from './routes/card.routes';
+import uploadRoutes from './routes/upload.routes';
 import { logger } from './services/logger';
 
 // Load environment variables - check multiple locations for flexibility
@@ -29,9 +31,15 @@ app.use(cors({
   credentials: true
 }));
 
+// Apply rate limiting
+app.use(generalLimiter);
+
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files (uploads)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // API route definitions
 app.get('/api/health', (req, res) => {
@@ -40,6 +48,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/cards', cardRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Global error handling middleware
 app.use(errorHandler);

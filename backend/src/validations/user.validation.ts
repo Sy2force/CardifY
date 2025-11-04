@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { validate } from '../middlewares/validation';
 
 export const registerSchema = Joi.object({
   firstName: Joi.string().min(2).max(50).required().messages({
@@ -48,3 +49,8 @@ export const updateUserSchema = Joi.object({
     'string.pattern.base': 'Please enter a valid phone number'
   })
 });
+
+// Export validation functions for middleware use
+export const registerValidation = validate(registerSchema);
+export const loginValidation = validate(loginSchema);
+export const updateProfileValidation = validate(updateUserSchema);

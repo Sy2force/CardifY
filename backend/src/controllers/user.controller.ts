@@ -4,10 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model';
 import { registerSchema, loginSchema, updateUserSchema } from '../validations/user.validation';
 import { logger } from '../services/logger';
-
-interface AuthRequest extends Request {
-  user?: any;
-}
+import { AuthRequest } from '../types/AuthRequest';
 
 const generateToken = (user: any): string => {
   return jwt.sign(

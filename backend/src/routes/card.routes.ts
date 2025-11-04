@@ -9,6 +9,9 @@ import {
   likeCard
 } from '../controllers/card.controller';
 import { authMiddleware, businessMiddleware } from '../middlewares/auth';
+import { validate } from '../middlewares/validation';
+import { cardLimiter } from '../middlewares/rateLimit';
+import { createCardValidation, updateCardValidation } from '../validations/card.validation';
 
 const router = express.Router();
 
@@ -17,12 +20,12 @@ router.get('/', getAllCards);
 
 // Protected routes (specific routes before parameterized routes)
 router.get('/my-cards', authMiddleware, getMyCards);
-router.post('/', authMiddleware, createCard);
+router.post('/', authMiddleware, cardLimiter, createCardValidation, createCard);
 router.patch('/:id/like', authMiddleware, likeCard);
 
 // Parameterized routes at the end
 router.get('/:id', getCardById);
-router.put('/:id', authMiddleware, updateCard);
+router.put('/:id', authMiddleware, updateCardValidation, updateCard);
 router.delete('/:id', authMiddleware, deleteCard);
 
 export default router;
