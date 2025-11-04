@@ -17,7 +17,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3006;
+const PORT = parseInt(process.env.PORT || '3006', 10);
 
 // Configure middleware for CORS, logging, and request parsing
 const allowedOrigins = process.env.NODE_ENV === 'production' 
@@ -50,16 +50,22 @@ app.use('*', (req, res) => {
 });
 
 // Connect to MongoDB and start the server
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/cardify')
+const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
+console.log('Attempting to connect to MongoDB...');
+
+mongoose.connect(mongoUri)
   .then(() => {
-    logger.info('Connected to MongoDB');
-    app.listen(PORT, () => {
+    logger.info('Connected to MongoDB successfully');
+    console.log('✅ MongoDB connected');
+    
+    app.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server running on port ${PORT}`);
-      console.log(`🚀 Cardify API server running on http://localhost:${PORT}`);
+      console.log(`🚀 Cardify API server running on port ${PORT}`);
     });
   })
   .catch((error) => {
     logger.error('Database connection error:', error);
+    console.error('❌ MongoDB connection failed:', error.message);
     process.exit(1);
   });
 

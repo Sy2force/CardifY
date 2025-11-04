@@ -11,9 +11,7 @@ services:
       - key: PORT
         value: 10000
       - key: MONGO_URI
-        fromDatabase:
-          name: cardify-db
-          property: connectionString
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
