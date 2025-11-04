@@ -57,30 +57,40 @@ console.log('MongoDB URI (masked):', mongoUri.replace(/\/\/.*@/, '//***:***@'));
 // Configure mongoose with better timeout settings
 mongoose.set('strictQuery', false);
 
+// Start server even if MongoDB fails initially
+app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Server running on port ${PORT}`);
+  console.log(`🚀 Cardify API server running on port ${PORT}`);
+});
+
 const connectWithRetry = () => {
   mongoose.connect(mongoUri, {
-    serverSelectionTimeoutMS: 30000, // 30 seconds
-    socketTimeoutMS: 45000, // 45 seconds
-    maxPoolSize: 10,
-    minPoolSize: 5,
+    serverSelectionTimeoutMS: 10000, // 10 seconds
+    socketTimeoutMS: 20000, // 20 seconds
+    connectTimeoutMS: 10000, // 10 seconds
+    maxPoolSize: 5,
+    minPoolSize: 1,
     maxIdleTimeMS: 30000,
     retryWrites: true,
-    w: 'majority'
+    w: 'majority',
+    authSource: 'admin'
   })
   .then(() => {
     logger.info('Connected to MongoDB successfully');
     console.log('✅ MongoDB connected');
-    
-    app.listen(PORT, '0.0.0.0', () => {
-      logger.info(`Server running on port ${PORT}`);
-      console.log(`🚀 Cardify API server running on port ${PORT}`);
-    });
   })
   .catch((error) => {
     logger.error('Database connection error:', error);
     console.error('❌ MongoDB connection failed:', error.message);
-    console.log('Retrying connection in 5 seconds...');
-    setTimeout(connectWithRetry, 5000);
+    
+    // Don't retry indefinitely in production
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Production environment - will not retry MongoDB connection');
+      return;
+    }
+    
+    console.log('Retrying connection in 10 seconds...');
+    setTimeout(connectWithRetry, 10000);
   });
 };
 
