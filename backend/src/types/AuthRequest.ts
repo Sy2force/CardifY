@@ -11,7 +11,4 @@ export interface AuthRequest extends Request {
     isBusiness: boolean;
     role: string;
   };
-  body: any;
-  params: any;
-  query: any;
 }
