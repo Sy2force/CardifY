@@ -1,0 +1,74 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e6]:
+      - link "Cardify" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img [ref=e10]
+        - generic [ref=e13]: Cardify
+      - generic [ref=e14]:
+        - link "nav.dashboard" [ref=e15] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Favorites" [ref=e16] [cursor=pointer]:
+          - /url: /favorites
+          - img [ref=e17]
+          - text: Favorites
+        - button [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+  - main [ref=e24]:
+    - generic [ref=e25]:
+      - generic [ref=e30]:
+        - heading "Créez votre carte digitale en 30 secondes" [level=1] [ref=e31]
+        - paragraph [ref=e32]: Professionnel, rapide, humain.
+        - paragraph [ref=e33]: Cardify transforme votre identité professionnelle en carte digitale moderne. Partagez votre expertise, connectez-vous avec votre audience, développez votre réseau.
+        - generic [ref=e34]:
+          - button "Commencer maintenant" [ref=e35] [cursor=pointer]:
+            - text: Commencer maintenant
+            - img [ref=e36]
+          - button "Découvrir les cartes" [ref=e39] [cursor=pointer]
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - img [ref=e45]
+          - generic [ref=e48]: 1000+
+          - generic [ref=e49]: Cartes créées
+        - generic [ref=e50]:
+          - img [ref=e52]
+          - generic [ref=e57]: 500+
+          - generic [ref=e58]: Professionnels connectés
+        - generic [ref=e59]:
+          - img [ref=e61]
+          - generic [ref=e65]: "3"
+          - generic [ref=e66]: Langues supportées
+      - generic [ref=e68]:
+        - heading "Pourquoi choisir Cardify ?" [level=2] [ref=e70]
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - img [ref=e74]
+            - heading "Création instantanée" [level=3] [ref=e76]
+            - paragraph [ref=e77]: Votre carte professionnelle prête en quelques clics
+          - generic [ref=e78]:
+            - img [ref=e80]
+            - heading "Design moderne" [level=3] [ref=e86]
+            - paragraph [ref=e87]: Interface élégante qui impressionne vos contacts
+          - generic [ref=e88]:
+            - img [ref=e90]
+            - heading "Partage facile" [level=3] [ref=e96]
+            - paragraph [ref=e97]: Partagez votre carte d'un simple lien
+      - generic [ref=e100]:
+        - heading "Prêt à créer votre carte professionnelle ?" [level=2] [ref=e101]
+        - paragraph [ref=e102]: Rejoignez des centaines de professionnels qui font confiance à Cardify
+        - button "Commencer maintenant" [ref=e103] [cursor=pointer]:
+          - text: Commencer maintenant
+          - img [ref=e104]
+  - contentinfo [ref=e107]:
+    - generic [ref=e109]:
+      - generic [ref=e110]:
+        - img [ref=e112]
+        - generic [ref=e115]: Cardify
+      - paragraph [ref=e116]: Cardify - Votre identité professionnelle, réinventée
+      - generic [ref=e117]:
+        - generic [ref=e118]: © 2024 Cardify. Tous droits réservés.
+        - img [ref=e119]
+```

@@ -1,0 +1,85 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e6]:
+      - link "Cardify" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img [ref=e10]
+        - generic [ref=e12]: Cardify
+      - generic [ref=e13]:
+        - link "Accueil" [ref=e14] [cursor=pointer]:
+          - /url: /
+        - link "Cartes" [ref=e15] [cursor=pointer]:
+          - /url: /cards
+      - generic [ref=e16]:
+        - button "Passer en mode sombre" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+        - button "🇫🇷" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - generic [ref=e25]: 🇫🇷
+        - generic [ref=e26]:
+          - button "Connexion" [ref=e27] [cursor=pointer]
+          - button "Inscription" [active] [ref=e28] [cursor=pointer]
+  - main [ref=e29]:
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - img [ref=e35]
+        - heading "Create Account" [level=1] [ref=e37]
+        - paragraph [ref=e38]: Join Cardify and create your first digital business card
+      - generic [ref=e39]:
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: Prénom
+              - generic [ref=e44]:
+                - generic:
+                  - img
+                - textbox "Prénom" [ref=e45]
+            - generic [ref=e46]:
+              - generic [ref=e47]: Nom
+              - textbox "Nom" [ref=e48]
+          - generic [ref=e49]:
+            - generic [ref=e50]: Adresse email
+            - generic [ref=e51]:
+              - generic:
+                - img
+              - textbox "votre@email.com" [ref=e52]
+          - generic [ref=e53]:
+            - generic [ref=e54]: Mot de passe
+            - generic [ref=e55]:
+              - generic:
+                - img
+              - textbox "••••••••" [ref=e56]
+              - button [ref=e57] [cursor=pointer]:
+                - img [ref=e58]
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - text: Téléphone
+              - generic [ref=e63]: (optionnel)
+            - generic [ref=e64]:
+              - generic:
+                - img
+              - textbox "+33 1 23 45 67 89 ou 01 23 45 67 89" [ref=e65]
+          - generic [ref=e66]:
+            - checkbox [ref=e67]
+            - generic [ref=e68]:
+              - img [ref=e69]
+              - generic [ref=e72]: Business Account
+            - paragraph [ref=e73]: Allows you to create and manage business cards
+        - button "Créer mon compte" [ref=e75] [cursor=pointer]
+        - paragraph [ref=e77]:
+          - text: Already have an account?
+          - link "Sign In" [ref=e78] [cursor=pointer]:
+            - /url: /login
+  - contentinfo [ref=e79]:
+    - generic [ref=e81]:
+      - generic [ref=e82]:
+        - img [ref=e84]
+        - generic [ref=e86]: Cardify
+      - paragraph [ref=e87]: Cardify - Votre identité professionnelle, réinventée
+      - generic [ref=e88]:
+        - generic [ref=e89]: © 2024 Cardify. Tous droits réservés.
+        - img [ref=e90]
+```

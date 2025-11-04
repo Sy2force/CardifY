@@ -4,13 +4,13 @@ Merci de votre intérêt pour contribuer à Cardify ! Ce guide vous aidera à d�
 
 ## 📋 Table des Matières
 
-- [Code de Conduite](#code-de-conduite)
-- [Comment Contribuer](#comment-contribuer)
-- [Configuration de Développement](#configuration-de-développement)
-- [Standards de Code](#standards-de-code)
-- [Process de Pull Request](#process-de-pull-request)
-- [Signaler des Bugs](#signaler-des-bugs)
-- [Demander des Fonctionnalités](#demander-des-fonctionnalités)
+- [Code de Conduite](#-code-de-conduite)
+- [Comment Contribuer](#-comment-contribuer)
+- [Configuration de Développement](#️-configuration-de-développement)
+- [Standards de Code](#-standards-de-code)
+- [Process de Pull Request](#-process-de-pull-request)
+- [Signaler des Bugs](#-signaler-des-bugs)
+- [Demander des Fonctionnalités](#-demander-des-fonctionnalités)
 
 ## 📜 Code de Conduite
 
@@ -82,7 +82,7 @@ npm run dev
 
 ### Structure des Commits
 
-```
+```bash
 type(scope): description courte
 
 Description plus détaillée si nécessaire
@@ -92,6 +92,7 @@ Description plus détaillée si nécessaire
 ```
 
 **Types de commits :**
+
 - `feat`: Nouvelle fonctionnalité
 - `fix`: Correction de bug
 - `docs`: Documentation
@@ -254,7 +255,7 @@ npm run test:e2e
 ## 🤔 Questions ?
 
 - 💬 **Discussions** : Utilisez les GitHub Discussions
-- 📧 **Email** : shay@cardify.com
+- 📧 **Email** : <shay@cardify.com>
 - 🐛 **Issues** : GitHub Issues pour les bugs
 
 ## 🙏 Remerciements
@@ -263,4 +264,4 @@ Merci à tous les contributeurs qui rendent Cardify meilleur !
 
 ---
 
-**Happy Coding! 🚀**
+## Happy Coding! 🚀

@@ -12,4 +12,10 @@ module.exports = {
     '!src/data/**',
   ],
   setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json'
+    }
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

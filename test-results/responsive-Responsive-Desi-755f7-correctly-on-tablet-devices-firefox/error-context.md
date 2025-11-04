@@ -1,0 +1,47 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e6]:
+        - link "Cardify" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - img [ref=e10]
+          - generic [ref=e13]: Cardify
+        - generic [ref=e14]:
+          - link "Accueil" [ref=e15] [cursor=pointer]:
+            - /url: /
+          - link "Cartes" [ref=e16] [cursor=pointer]:
+            - /url: /cards
+        - generic [ref=e17]:
+          - button "Passer en mode sombre" [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+          - button "🇫🇷" [ref=e22] [cursor=pointer]:
+            - img [ref=e23]
+            - generic [ref=e27]: 🇫🇷
+          - generic [ref=e28]:
+            - button "Connexion" [ref=e29] [cursor=pointer]
+            - button "Inscription" [ref=e30] [cursor=pointer]
+    - main [ref=e31]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - heading "Découvrez les professionnels" [level=1] [ref=e35]
+          - paragraph [ref=e36]: Explorez les cartes de visite de notre communauté
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - textbox "Rechercher..." [ref=e42]
+        - generic [ref=e43]:
+          - generic [ref=e44]: 🃏
+          - paragraph [ref=e45]: Aucune carte trouvée
+    - contentinfo [ref=e46]:
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - img [ref=e51]
+          - generic [ref=e54]: Cardify
+        - paragraph [ref=e55]: Cardify - Votre identité professionnelle, réinventée
+        - generic [ref=e56]:
+          - generic [ref=e57]: © 2024 Cardify. Tous droits réservés.
+          - img [ref=e58]
+  - status [ref=e65]: Impossible de se connecter au serveur. Vérifiez votre connexion.
+```

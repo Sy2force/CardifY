@@ -1,5 +1,6 @@
 import request from 'supertest';
 import app from '../server';
+import { describe, it, expect } from '@jest/globals';
 
 describe('Auth Endpoints', () => {
   describe('GET /api/health', () => {

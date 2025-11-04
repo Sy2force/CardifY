@@ -1,0 +1,75 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e6]:
+        - link "Cardify" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - img [ref=e10]
+          - generic [ref=e13]: Cardify
+        - generic [ref=e14]:
+          - link "Accueil" [ref=e15] [cursor=pointer]:
+            - /url: /
+          - link "Cartes" [ref=e16] [cursor=pointer]:
+            - /url: /cards
+        - generic [ref=e17]:
+          - button "Passer en mode sombre" [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+          - button "🇫🇷" [ref=e22] [cursor=pointer]:
+            - img [ref=e23]
+            - generic [ref=e27]: 🇫🇷
+          - generic [ref=e28]:
+            - button "Connexion" [ref=e29] [cursor=pointer]
+            - button "Inscription" [ref=e30] [cursor=pointer]
+    - main [ref=e31]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - img [ref=e37]
+          - heading "Bon retour !" [level=2] [ref=e40]
+          - paragraph [ref=e41]: Connectez-vous à votre compte Cardify
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - generic [ref=e45]: Adresse email
+              - generic [ref=e46]:
+                - generic:
+                  - img
+                - textbox "votre@email.com" [ref=e47]: admin@cardify.com
+            - generic [ref=e48]:
+              - generic [ref=e49]: Mot de passe
+              - generic [ref=e50]:
+                - generic:
+                  - img
+                - textbox "••••••••" [ref=e51]: admin123
+                - button [ref=e52] [cursor=pointer]:
+                  - img [ref=e53]
+          - button "Se connecter" [ref=e57] [cursor=pointer]
+          - paragraph [ref=e59]:
+            - text: Pas encore de compte ? Inscrivez-vous
+            - link "Inscription" [ref=e60] [cursor=pointer]:
+              - /url: /register
+        - generic [ref=e61]:
+          - heading "🧪 Comptes de démonstration" [level=3] [ref=e62]
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - strong [ref=e65]: "Admin:"
+              - text: admin@cardify.com / admin123
+            - generic [ref=e66]:
+              - strong [ref=e67]: "Business:"
+              - text: sarah@example.com / business123
+            - generic [ref=e68]:
+              - strong [ref=e69]: "User:"
+              - text: john@example.com / user123
+    - contentinfo [ref=e70]:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - img [ref=e75]
+          - generic [ref=e78]: Cardify
+        - paragraph [ref=e79]: Cardify - Votre identité professionnelle, réinventée
+        - generic [ref=e80]:
+          - generic [ref=e81]: © 2024 Cardify. Tous droits réservés.
+          - img [ref=e82]
+  - status [ref=e89]: Impossible de se connecter au serveur. Vérifiez votre connexion.
+```
