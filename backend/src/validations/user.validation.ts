@@ -1,61 +1,61 @@
-// Validations utilisateur - Schémas Joi pour les données d'entrée
+// User validations - Joi schemas for input data
 import Joi from 'joi';
 import { validate } from '../middlewares/validation';
 
-// Schéma de validation pour l'inscription
+// Validation schema for user registration
 export const registerSchema = Joi.object({
   firstName: Joi.string().min(2).max(50).required().messages({
-    'string.min': 'Le prénom doit contenir au moins 2 caractères',
-    'string.max': 'Le prénom ne doit pas dépasser 50 caractères',
-    'any.required': 'Le prénom est requis'
+    'string.min': 'First name must be at least 2 characters',
+    'string.max': 'First name must not exceed 50 characters',
+    'any.required': 'First name is required'
   }),
   lastName: Joi.string().min(2).max(50).required().messages({
-    'string.min': 'Le nom doit contenir au moins 2 caractères',
-    'string.max': 'Le nom ne doit pas dépasser 50 caractères',
-    'any.required': 'Le nom est requis'
+    'string.min': 'Last name must be at least 2 characters',
+    'string.max': 'Last name must not exceed 50 characters',
+    'any.required': 'Last name is required'
   }),
   email: Joi.string().email().required().messages({
-    'string.email': 'Veuillez entrer un email valide',
-    'any.required': 'L\'email est requis'
+    'string.email': 'Please enter a valid email',
+    'any.required': 'Email is required'
   }),
   password: Joi.string().min(6).required().messages({
-    'string.min': 'Le mot de passe doit contenir au moins 6 caractères',
-    'any.required': 'Le mot de passe est requis'
+    'string.min': 'Password must be at least 6 characters',
+    'any.required': 'Password is required'
   }),
   phone: Joi.string().pattern(/^[+]?[\d\s\-.()]+$/).min(1).max(25).allow('').messages({
-    'string.pattern.base': 'Veuillez entrer un numéro de téléphone valide'
+    'string.pattern.base': 'Please enter a valid phone number'
   }),
-  isBusiness: Joi.boolean().default(false), // Compte business par défaut false
-  isAdmin: Joi.boolean().default(false)     // Admin par défaut false
+  isBusiness: Joi.boolean().default(false), // Business account defaults to false
+  isAdmin: Joi.boolean().default(false)     // Admin defaults to false
 });
 
-// Schéma de validation pour la connexion
+// Validation schema for user login
 export const loginSchema = Joi.object({
   email: Joi.string().email().required().messages({
-    'string.email': 'Veuillez entrer un email valide',
-    'any.required': 'L\'email est requis'
+    'string.email': 'Please enter a valid email',
+    'any.required': 'Email is required'
   }),
   password: Joi.string().required().messages({
-    'any.required': 'Le mot de passe est requis'
+    'any.required': 'Password is required'
   })
 });
 
-// Schéma de validation pour la mise à jour du profil
+// Validation schema for profile updates
 export const updateUserSchema = Joi.object({
   firstName: Joi.string().min(2).max(50).messages({
-    'string.min': 'Le prénom doit contenir au moins 2 caractères',
-    'string.max': 'Le prénom ne doit pas dépasser 50 caractères'
+    'string.min': 'First name must be at least 2 characters',
+    'string.max': 'First name must not exceed 50 characters'
   }),
   lastName: Joi.string().min(2).max(50).messages({
-    'string.min': 'Le nom doit contenir au moins 2 caractères',
-    'string.max': 'Le nom ne doit pas dépasser 50 caractères'
+    'string.min': 'Last name must be at least 2 characters',
+    'string.max': 'Last name must not exceed 50 characters'
   }),
   phone: Joi.string().pattern(/^[+]?[\d\s\-.()]+$/).min(1).max(25).messages({
-    'string.pattern.base': 'Veuillez entrer un numéro de téléphone valide'
+    'string.pattern.base': 'Please enter a valid phone number'
   })
 });
 
-// Export des fonctions de validation pour les middlewares
-export const registerValidation = validate(registerSchema);     // Validation inscription
-export const loginValidation = validate(loginSchema);           // Validation connexion
-export const updateProfileValidation = validate(updateUserSchema); // Validation mise à jour
+// Export validation functions for middleware use
+export const registerValidation = validate(registerSchema);     // Registration validation
+export const loginValidation = validate(loginSchema);           // Login validation
+export const updateProfileValidation = validate(updateUserSchema); // Profile update validation

@@ -1,14 +1,14 @@
-// Service de logging - Gestion centralisée des logs avec fichiers quotidiens
+// Logging service - Centralized log management with daily files
 import fs from 'fs';
 import path from 'path';
 
-// Création du répertoire logs s'il n'existe pas
+// Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '../../logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Génère le nom du fichier de log basé sur la date actuelle
+// Generate log filename based on current date
 const getLogFileName = (): string => {
   const date = new Date();
   const year = date.getFullYear();
@@ -17,7 +17,7 @@ const getLogFileName = (): string => {
   return `${year}-${month}-${day}.log`; // Format: YYYY-MM-DD.log
 };
 
-// Écrit une entrée de log dans le fichier quotidien
+// Write log entry to daily log file
 const writeLog = (level: string, message: string, data?: Record<string, unknown>): void => {
   const timestamp = new Date().toISOString();
   const logEntry = `[${timestamp}] ${level.toUpperCase()}: ${message}${data ? ` | Data: ${JSON.stringify(data)}` : ''}\n`;
@@ -25,17 +25,17 @@ const writeLog = (level: string, message: string, data?: Record<string, unknown>
   const logFile = path.join(logsDir, getLogFileName());
   fs.appendFileSync(logFile, logEntry);
   
-  // Affichage console en développement uniquement
+  // Console output in development only
   if (process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console
-    console.log(logEntry.trim()); // Affichage pour debug local
+    console.log(logEntry.trim()); // Display for local debugging
   }
 };
 
-// Logger centralisé avec différents niveaux de log
+// Centralized logger with different log levels
 export const logger = {
-  info: (message: string, data?: Record<string, unknown>): void => writeLog('info', message, data),   // Informations générales
-  error: (message: string, data?: Record<string, unknown>): void => writeLog('error', message, data), // Erreurs critiques
-  warn: (message: string, data?: Record<string, unknown>): void => writeLog('warn', message, data),   // Avertissements
-  debug: (message: string, data?: Record<string, unknown>): void => writeLog('debug', message, data)  // Debug développement
+  info: (message: string, data?: Record<string, unknown>): void => writeLog('info', message, data),   // General information
+  error: (message: string, data?: Record<string, unknown>): void => writeLog('error', message, data), // Critical errors
+  warn: (message: string, data?: Record<string, unknown>): void => writeLog('warn', message, data),   // Warnings
+  debug: (message: string, data?: Record<string, unknown>): void => writeLog('debug', message, data)  // Development debugging
 };
