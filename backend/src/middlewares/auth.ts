@@ -1,24 +1,29 @@
+// Middlewares d'authentification - Vérification des tokens et permissions
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model';
 import { logger } from '../services/logger';
 import { AuthRequest } from '../types/AuthRequest';
 
+// Middleware principal : vérification du token JWT
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
+    // Extraction du token depuis l'en-tête Authorization
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {
-      return res.status(401).json({ message: 'Access denied. No token provided.' });
+      return res.status(401).json({ message: 'Accès refusé. Token manquant.' });
     }
 
+    // Vérification et décodage du JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { _id: string };
     const user = await User.findById(decoded._id);
     
     if (!user) {
-      return res.status(401).json({ message: 'Invalid token.' });
+      return res.status(401).json({ message: 'Token invalide.' });
     }
 
+    // Injection des données utilisateur dans la requête
     req.user = {
       _id: user._id.toString(),
       id: user._id.toString(),
@@ -29,23 +34,25 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
       isBusiness: user.isBusiness,
       role: user.isAdmin ? 'admin' : user.isBusiness ? 'business' : 'user'
     };
-    next();
+    next(); // Passe au middleware suivant
   } catch (error: unknown) {
-    logger.error('Auth middleware error:', { error: String(error) });
-    return res.status(401).json({ message: 'Invalid token.' });
+    logger.error('Erreur middleware auth:', { error: String(error) });
+    return res.status(401).json({ message: 'Token invalide.' });
   }
 };
 
+// Middleware admin : vérifie les droits administrateur
 export const adminMiddleware = (req: AuthRequest, res: Response, next: NextFunction): Response | void => {
   if (!req.user?.isAdmin) {
-    return res.status(403).json({ message: 'Access denied. Admin rights required.' });
+    return res.status(403).json({ message: 'Accès refusé. Droits admin requis.' });
   }
-  next();
+  next(); // Utilisateur admin confirmé
 };
 
+// Middleware business : vérifie le compte professionnel
 export const businessMiddleware = (req: AuthRequest, res: Response, next: NextFunction): Response | void => {
   if (!req.user?.isBusiness && !req.user?.isAdmin) {
-    return res.status(403).json({ message: 'Access denied. Business account required.' });
+    return res.status(403).json({ message: 'Accès refusé. Compte business requis.' });
   }
-  next();
+  next(); // Compte business ou admin confirmé
 };
