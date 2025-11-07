@@ -1,3 +1,4 @@
+// App principal - Configuration des routes et layout global
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { ThemeProvider } from './context/ThemeContextProvider';
@@ -12,10 +13,11 @@ import Favorites from './pages/Favorites';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
 
-// Protected Route component
+// Route protégée - Nécessite une connexion
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
+  // Affichage du loader pendant vérification auth
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -24,13 +26,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
+  // Redirection vers login si non connecté
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
-// Admin Route component (requires admin role)
+// Route admin - Nécessite le rôle administrateur
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
+  // Loader pendant vérification
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -39,10 +43,12 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
+  // Pas connecté : vers login
   if (!user) {
     return <Navigate to="/login" />;
   }
   
+  // Pas admin : vers dashboard
   if (!user.isAdmin) {
     return <Navigate to="/dashboard" />;
   }
@@ -50,10 +56,11 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Public Route component (redirect to dashboard if already logged in)
+// Route publique - Redirige vers dashboard si déjà connecté
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
+  // Loader pendant vérification
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -62,9 +69,11 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
+  // Déjà connecté : vers dashboard
   return !user ? <>{children}</> : <Navigate to="/dashboard" />;
 };
 
+// Composant principal de l'application
 function App() {
   return (
     <ThemeProvider>
@@ -73,43 +82,43 @@ function App() {
         
         <main className="flex-grow">
           <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Landing />} />
-            <Route path="/cards" element={<Cards />} />
-            <Route path="/cards/:id" element={<CardDetails />} />
+            {/* Routes publiques - accessibles à tous */}
+            <Route path="/" element={<Landing />} />              {/* Page d'accueil */}
+            <Route path="/cards" element={<Cards />} />            {/* Liste des cartes */}
+            <Route path="/cards/:id" element={<CardDetails />} /> {/* Détails carte */}
             
-            {/* Auth routes (redirect if already logged in) */}
+            {/* Routes d'authentification - redirige si connecté */}
             <Route path="/login" element={
               <PublicRoute>
-                <Login />
+                <Login />                                           {/* Connexion */}
               </PublicRoute>
             } />
             <Route path="/register" element={
               <PublicRoute>
-                <Register />
+                <Register />                                        {/* Inscription */}
               </PublicRoute>
             } />
             
-            {/* Protected routes */}
+            {/* Routes protégées - connexion requise */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <Dashboard />
+                <Dashboard />                                       {/* Tableau de bord */}
               </ProtectedRoute>
             } />
             <Route path="/favorites" element={
               <ProtectedRoute>
-                <Favorites />
+                <Favorites />                                       {/* Cartes favorites */}
               </ProtectedRoute>
             } />
             
-            {/* Admin routes */}
+            {/* Routes admin - rôle admin requis */}
             <Route path="/admin" element={
               <AdminRoute>
-                <Admin />
+                <Admin />                                           {/* Panel admin */}
               </AdminRoute>
             } />
             
-            {/* Catch all route */}
+            {/* Route par défaut - retour accueil */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>

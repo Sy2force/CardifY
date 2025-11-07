@@ -1,3 +1,4 @@
+// Contrôleur utilisateurs - Gestion auth et profils
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -5,14 +6,16 @@ import User from '../models/user.model';
 import { AuthRequest } from '../types/AuthRequest';
 import { registerSchema, loginSchema, updateUserSchema } from '../validations/user.validation';
 import { logger } from '../services/logger';
-// import { sendEmail } from '../services/email';
+// import { sendEmail } from '../services/email'; // Service email (futur)
 
+// Interface pour les données du token JWT
 interface TokenUser {
   _id: string;
   isAdmin: boolean;
   isBusiness: boolean;
 }
 
+// Génération d'un token JWT sécurisé
 const generateToken = (user: TokenUser): string => {
   return jwt.sign(
     { 
@@ -21,12 +24,14 @@ const generateToken = (user: TokenUser): string => {
       isBusiness: user.isBusiness 
     },
     process.env.JWT_SECRET!,
-    { expiresIn: '30d' }
+    { expiresIn: '30d' } // Token valide 30 jours
   );
 };
 
+// Inscription d'un nouvel utilisateur
 export const register = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
+    // Validation des données d'entrée
     const { error } = registerSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ 
@@ -36,7 +41,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<Respons
 
     const { firstName, lastName, email, password, phone, isBusiness, isAdmin } = req.body;
 
-    // Check if user already exists
+    // Vérification : email déjà utilisé ?
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ 
@@ -45,37 +50,39 @@ export const register = async (req: AuthRequest, res: Response): Promise<Respons
       });
     }
 
-    // Create new user
+    // Création du nouvel utilisateur
     const user = new User({
       firstName,
       lastName,
       email,
-      password,
+      password, // Sera hashé automatiquement par le middleware
       phone,
       isBusiness: isBusiness || false,
       isAdmin: isAdmin || false
     });
 
-    await user.save();
+    await user.save(); // Sauvegarde en DB
     
-    const token = generateToken(user);
+    const token = generateToken(user); // Génération du JWT
 
-    logger.info(`User registered: ${user.email}`);
+    logger.info(`Nouvel utilisateur inscrit: ${user.email}`);
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
-      user: user.toJSON(),
+      message: 'Inscription réussie',
+      user: user.toJSON(), // Sans le mot de passe
       token
     });
   } catch (error) {
-    logger.error('Register error:', { error: String(error) });
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Erreur inscription:', { error: String(error) });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
+// Connexion utilisateur
 export const login = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
+    // Validation des données
     const { error } = loginSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ 
@@ -85,7 +92,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<Response |
 
     const { email, password } = req.body;
 
-    // Find user by email and explicitly include password
+    // Recherche de l'utilisateur par email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ 
@@ -94,56 +101,57 @@ export const login = async (req: AuthRequest, res: Response): Promise<Response |
       });
     }
 
-    // Get user with password using separate query to ensure password is included
+    // Récupération avec mot de passe (exclu par défaut)
     const userWithPassword = await User.findById(user._id).select('+password');
     if (!userWithPassword || !userWithPassword.password) {
-      logger.error('User found but no password available');
+      logger.error('Utilisateur trouvé mais mot de passe manquant');
       return res.status(400).json({ 
-        message: 'Invalid email or password' 
+        message: 'Email ou mot de passe incorrect' 
       });
     }
 
-    // Direct bcrypt comparison
+    // Vérification sécurisée du mot de passe
     const isMatch = await bcrypt.compare(password, userWithPassword.password);
     
     if (!isMatch) {
-      logger.info(`Failed login attempt for: ${email}`);
+      logger.info(`Tentative de connexion échouée: ${email}`);
       return res.status(400).json({ 
         success: false,
         message: 'Email ou mot de passe incorrect' 
       });
     }
 
-    const token = generateToken(user);
+    const token = generateToken(user); // Génération du JWT
     
-    logger.info(`User logged in: ${user.email}`);
+    logger.info(`Connexion réussie: ${user.email}`);
     
     res.json({
       success: true,
-      message: 'Login successful',
+      message: 'Connexion réussie',
       user: user.toJSON(),
       token
     });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Login error:', { error: String(error) });
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    logger.error('Erreur connexion:', { error: String(error) });
     res.status(500).json({ 
-      message: 'Server error',
+      message: 'Erreur serveur',
       ...(process.env.NODE_ENV === 'development' && { error: errorMessage })
     });
   }
 };
 
+// Récupération du profil utilisateur connecté
 export const getProfile = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
-    const user = req.user;
+    const user = req.user; // Injecté par le middleware auth
     if (!user) {
-      return res.status(401).json({ message: 'User not authenticated' });
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
     }
     
     res.json({
       success: true,
-      message: 'Profile retrieved successfully',
+      message: 'Profil récupéré avec succès',
       user: {
         _id: user._id,
         firstName: user.firstName,
@@ -155,13 +163,15 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<Respo
       }
     });
   } catch (error) {
-    logger.error('Get profile error:', { error: String(error) });
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Erreur récupération profil:', { error: String(error) });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
+// Mise à jour du profil utilisateur
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
+    // Validation des nouvelles données
     const { error } = updateUserSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ 
@@ -172,44 +182,48 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<Re
     const userId = req.user?._id;
     const updates = req.body;
 
+    // Mise à jour avec validation
     const user = await User.findByIdAndUpdate(
       userId,
       { $set: updates },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true } // Retourne le doc mis à jour + validation
     );
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'Utilisateur introuvable' });
     }
 
-    logger.info(`User profile updated: ${user.email}`);
+    logger.info(`Profil mis à jour: ${user.email}`);
 
     res.json({
       success: true,
-      message: 'Profile updated successfully',
+      message: 'Profil mis à jour avec succès',
       user: user.toJSON()
     });
   } catch (error) {
-    logger.error('Update profile error:', { error: String(error) });
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Erreur mise à jour profil:', { error: String(error) });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
+// Liste de tous les utilisateurs (admin uniquement)
 export const getAllUsers = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
+    // Paramètres de pagination
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
+    // Récupération avec pagination
     const users = await User.find()
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 }); // Plus récents en premier
 
     const total = await User.countDocuments();
 
     res.json({
-      message: 'Users retrieved successfully',
+      message: 'Utilisateurs récupérés avec succès',
       users,
       pagination: {
         page,
@@ -219,25 +233,27 @@ export const getAllUsers = async (req: AuthRequest, res: Response): Promise<Resp
       }
     });
   } catch (error) {
-    logger.error('Get all users error:', { error: String(error) });
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Erreur récupération utilisateurs:', { error: String(error) });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
+// Suppression d'un utilisateur (admin uniquement)
 export const deleteProfile = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const userId = req.params.id;
     
+    // Suppression de l'utilisateur
     const user = await User.findByIdAndDelete(userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'Utilisateur introuvable' });
     }
 
-    logger.info(`User login: ${user.email}`);
+    logger.info(`Utilisateur supprimé: ${user.email}`);
 
-    res.json({ message: 'User deleted successfully' });
+    res.json({ message: 'Utilisateur supprimé avec succès' });
   } catch (error) {
-    logger.error('Delete user error:', { error: String(error) });
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Erreur suppression utilisateur:', { error: String(error) });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
