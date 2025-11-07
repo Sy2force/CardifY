@@ -5,10 +5,10 @@ import {
   getProfile,
   updateProfile,
   getAllUsers,
-  deleteUser
+  deleteProfile
 } from '../controllers/user.controller';
 import { authMiddleware, adminMiddleware } from '../middlewares/auth';
-import { validate } from '../middlewares/validation';
+// import { validate } from '../middlewares/validation';
 import { authLimiter } from '../middlewares/rateLimit';
 import { registerValidation, loginValidation, updateProfileValidation } from '../validations/user.validation';
 
@@ -24,6 +24,6 @@ router.put('/profile', authMiddleware, updateProfileValidation, updateProfile);
 
 // Admin only routes
 router.get('/', authMiddleware, adminMiddleware, getAllUsers);
-router.delete('/:id', authMiddleware, adminMiddleware, deleteUser);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteProfile);
 
 export default router;

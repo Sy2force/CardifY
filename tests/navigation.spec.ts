@@ -1,62 +1,58 @@
 import { test, expect } from '@playwright/test';
+import { loginAsAdmin, clickWithRetry, safeClick, waitForNetworkIdle } from './utils/testHelpers';
 
 test.describe('Navigation Tests', () => {
-  test('should navigate through all main pages as guest', async ({ page }) => {
+  test('should handle browser back/forward navigation', async ({ page }) => {
+    // Start at home
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     
-    // Landing page
-    await expect(page).toHaveTitle(/Cardify/);
-    await expect(page.locator('h1')).toBeVisible();
-    
-    // Try to navigate to cards page if link exists
-    const cardsLink = page.locator('a:has-text("Cartes"), a:has-text("Cards"), nav a[href*="cards"]').first();
-    if (await cardsLink.isVisible()) {
-      await cardsLink.click();
-      await page.waitForTimeout(2000);
-      await expect(page).toHaveURL(/.*cards/);
-      
-      // Navigate back to home
-      const homeLink = page.locator('a:has-text("Accueil"), a:has-text("Home"), nav a[href="/"]').first();
-      if (await homeLink.isVisible()) {
-        await homeLink.click();
-        await expect(page).toHaveURL('/');
-      }
-    } else {
-      console.log('Cards navigation not available for guests');
+    // Navigate to login
+    const loginClicked = await safeClick(page, '[data-testid="navbar-login-button"]');
+    if (!loginClicked) {
+      await clickWithRetry(page, 'button:has-text("Connexion"), a:has-text("Connexion")');
     }
+    
+    await page.waitForURL(/.*login/, { timeout: 10000 });
+    
+    // Go back
+    await page.goBack();
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL('/');
+    
+    // Go forward
+    await page.goForward();
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/.*login/);
   });
 
-  test('should navigate through authenticated pages', async ({ page }) => {
-    // Login first
+  test('should navigate to dashboard after login', async ({ page }) => {
+    // Use helper function for reliable login
+    await loginAsAdmin(page);
+    await waitForNetworkIdle(page);
+    
+    // Should be on dashboard
+    await expect(page).toHaveURL(/.*dashboard/);
+    
+    // Check for dashboard content with fallback selectors
+    const dashboardIndicator = page.locator('[data-testid="dashboard-title"], h1:has-text("Dashboard"), h1:has-text("Tableau de bord"), main');
+    await expect(dashboardIndicator.first()).toBeVisible();
+  });
+
+  test('should navigate to login page from navbar', async ({ page }) => {
     await page.goto('/');
-    await page.getByText(/connexion/i).first().click();
-    await page.fill('input[type="email"]', 'admin@cardify.com');
-    await page.fill('input[type="password"]', 'admin123');
+    await page.waitForLoadState('networkidle');
     
-    const loginButton = page.locator('button[type="submit"], button:has-text("Connexion"), button:has-text("Se connecter"), .btn-primary').first();
-    await loginButton.click();
-    await page.waitForTimeout(3000);
-    
-    // Check if we're logged in (could be dashboard, cards, or home)
-    const currentUrl = page.url();
-    const isLoggedIn = currentUrl.includes('dashboard') || currentUrl.includes('cards') || !currentUrl.includes('login');
-    
-    if (isLoggedIn) {
-      // Try to navigate to different sections if they exist
-      const profileLink = page.locator('a:has-text("Profil"), a:has-text("Profile"), nav a[href*="profile"]').first();
-      if (await profileLink.isVisible()) {
-        await profileLink.click();
-        await page.waitForTimeout(1000);
-      }
-      
-      const cardsLink = page.locator('a:has-text("Mes cartes"), a:has-text("My cards"), nav a[href*="cards"]').first();
-      if (await cardsLink.isVisible()) {
-        await cardsLink.click();
-        await page.waitForTimeout(1000);
-      }
+    // Click login button in navbar with fallback
+    const loginClicked = await safeClick(page, '[data-testid="navbar-login-button"]');
+    if (!loginClicked) {
+      await clickWithRetry(page, 'button:has-text("Connexion"), a:has-text("Connexion")');
     }
     
-    expect(isLoggedIn).toBeTruthy();
+    // Should navigate to login page
+    await page.waitForURL(/.*login/, { timeout: 10000 });
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('[data-testid="login-heading"]')).toBeVisible();
   });
 
   test('should handle 404 page correctly', async ({ page }) => {
@@ -67,6 +63,8 @@ test.describe('Navigation Tests', () => {
 
   test('should redirect unauthenticated users from protected routes', async ({ page }) => {
     await page.goto('/dashboard');
+    await page.waitForURL('**/login', { timeout: 5000 });
     await expect(page).toHaveURL(/.*login/);
+    await expect(page.locator('[data-testid="login-heading"]')).toBeVisible();
   });
 });

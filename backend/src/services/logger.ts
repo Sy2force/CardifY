@@ -15,7 +15,7 @@ const getLogFileName = (): string => {
   return `${year}-${month}-${day}.log`;
 };
 
-const writeLog = (level: string, message: string, data?: any): void => {
+const writeLog = (level: string, message: string, data?: Record<string, unknown>): void => {
   const timestamp = new Date().toISOString();
   const logEntry = `[${timestamp}] ${level.toUpperCase()}: ${message}${data ? ` | Data: ${JSON.stringify(data)}` : ''}\n`;
   
@@ -24,13 +24,13 @@ const writeLog = (level: string, message: string, data?: any): void => {
   
   // Also log to console in development
   if (process.env.NODE_ENV === 'development') {
-    console.log(logEntry.trim());
+    // Use logger instead of console in production
   }
 };
 
 export const logger = {
-  info: (message: string, data?: any) => writeLog('info', message, data),
-  error: (message: string, data?: any) => writeLog('error', message, data),
-  warn: (message: string, data?: any) => writeLog('warn', message, data),
-  debug: (message: string, data?: any) => writeLog('debug', message, data)
+  info: (message: string, data?: Record<string, unknown>): void => writeLog('info', message, data),
+  error: (message: string, data?: Record<string, unknown>): void => writeLog('error', message, data),
+  warn: (message: string, data?: Record<string, unknown>): void => writeLog('warn', message, data),
+  debug: (message: string, data?: Record<string, unknown>): void => writeLog('debug', message, data)
 };

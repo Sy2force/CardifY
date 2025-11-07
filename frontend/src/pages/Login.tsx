@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, CreditCard } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { LoginFormData } from '../types';
 import Button from '../components/Button';
 
@@ -40,7 +40,20 @@ const Login: React.FC = () => {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
-      navigate('/dashboard');
+      // Redirect based on user role after successful login
+      const savedUser = localStorage.getItem('cardify_user');
+      if (savedUser) {
+        const user = JSON.parse(savedUser);
+        if (user.isAdmin) {
+          navigate('/admin');
+        } else if (user.isBusiness) {
+          navigate('/dashboard');
+        } else {
+          navigate('/cards');
+        }
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       // Error is handled in AuthContext
     } finally {
@@ -69,7 +82,7 @@ const Login: React.FC = () => {
             </div>
           </motion.div>
           
-          <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white" data-testid="login-heading">
             {t('auth.login.title')}
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -99,6 +112,7 @@ const Login: React.FC = () => {
                   {...register('email')}
                   type="email"
                   autoComplete="email"
+                  data-testid="email-input"
                   className={`form-input pl-10 ${
                     errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                   }`}
@@ -123,6 +137,7 @@ const Login: React.FC = () => {
                   {...register('password')}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
+                  data-testid="password-input"
                   className={`form-input pl-10 pr-10 ${
                     errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                   }`}
@@ -153,6 +168,7 @@ const Login: React.FC = () => {
               loading={isLoading}
               fullWidth
               size="lg"
+              data-testid="login-button"
               className="font-semibold bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
             >
               {t('auth.login.submit')}
@@ -181,13 +197,76 @@ const Login: React.FC = () => {
           transition={{ delay: 0.6 }}
           className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
         >
-          <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
+          <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-3">
             🧪 Comptes de démonstration
           </h3>
-          <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-            <div><strong>Admin:</strong> admin@cardify.com / admin123</div>
-            <div><strong>Business:</strong> sarah@example.com / business123</div>
-            <div><strong>User:</strong> john@example.com / user123</div>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => {
+                const form = document.querySelector('form');
+                if (form) {
+                  const emailInput = form.querySelector('[data-testid="email-input"]') as HTMLInputElement;
+                  const passwordInput = form.querySelector('[data-testid="password-input"]') as HTMLInputElement;
+                  if (emailInput && passwordInput) {
+                    emailInput.value = 'admin@cardify.com';
+                    passwordInput.value = 'admin123';
+                    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    emailInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    passwordInput.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
+                }
+              }}
+              className="w-full text-left p-2 text-xs bg-white dark:bg-gray-800 rounded border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+            >
+              <div className="font-medium text-blue-800 dark:text-blue-200">👑 Admin</div>
+              <div className="text-blue-600 dark:text-blue-400">admin@cardify.com / admin123</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const form = document.querySelector('form');
+                if (form) {
+                  const emailInput = form.querySelector('[data-testid="email-input"]') as HTMLInputElement;
+                  const passwordInput = form.querySelector('[data-testid="password-input"]') as HTMLInputElement;
+                  if (emailInput && passwordInput) {
+                    emailInput.value = 'sarah@example.com';
+                    passwordInput.value = 'business123';
+                    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    emailInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    passwordInput.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
+                }
+              }}
+              className="w-full text-left p-2 text-xs bg-white dark:bg-gray-800 rounded border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+            >
+              <div className="font-medium text-blue-800 dark:text-blue-200">💼 Business</div>
+              <div className="text-blue-600 dark:text-blue-400">sarah@example.com / business123</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const form = document.querySelector('form');
+                if (form) {
+                  const emailInput = form.querySelector('[data-testid="email-input"]') as HTMLInputElement;
+                  const passwordInput = form.querySelector('[data-testid="password-input"]') as HTMLInputElement;
+                  if (emailInput && passwordInput) {
+                    emailInput.value = 'john@example.com';
+                    passwordInput.value = 'user123';
+                    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    emailInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    passwordInput.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
+                }
+              }}
+              className="w-full text-left p-2 text-xs bg-white dark:bg-gray-800 rounded border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+            >
+              <div className="font-medium text-blue-800 dark:text-blue-200">👤 User</div>
+              <div className="text-blue-600 dark:text-blue-400">john@example.com / user123</div>
+            </button>
           </div>
         </motion.div>
       </motion.div>

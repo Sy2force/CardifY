@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import App from './App.tsx'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider } from './context/AuthContextProvider';
 import './i18n/index.ts'
 import './index.css'
 

@@ -3,7 +3,7 @@ import { Schema } from 'joi';
 import { logger } from '../services/logger';
 
 export const validate = (schema: Schema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): Response | void => {
     const { error } = schema.validate(req.body);
     
     if (error) {
@@ -19,7 +19,7 @@ export const validate = (schema: Schema) => {
 };
 
 export const validateQuery = (schema: Schema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): Response | void => {
     const { error } = schema.validate(req.query);
     
     if (error) {
@@ -35,7 +35,7 @@ export const validateQuery = (schema: Schema) => {
 };
 
 export const validateParams = (schema: Schema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): Response | void => {
     const { error } = schema.validate(req.params);
     
     if (error) {

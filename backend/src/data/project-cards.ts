@@ -2,7 +2,7 @@ import Card from '../models/card.model';
 import User from '../models/user.model';
 import { logger } from '../services/logger';
 
-export const createProjectCards = async () => {
+export const createProjectCards = async (): Promise<unknown[]> => {
   try {
     // Trouver un utilisateur business existant ou créer un utilisateur pour les projets
     let projectUser = await User.findOne({ email: 'projects@cardify.com' });
@@ -147,7 +147,7 @@ export const createProjectCards = async () => {
     return createdCards;
     
   } catch (error) {
-    logger.error('Erreur lors de la création des cartes de projets:', error);
+    logger.error('Erreur lors de la création des cartes de projets:', { error: String(error) });
     throw error;
   }
 };

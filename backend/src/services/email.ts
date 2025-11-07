@@ -42,7 +42,7 @@ class EmailService {
       logger.info(`Email sent successfully to ${options.to}: ${info.messageId}`);
       return true;
     } catch (error) {
-      logger.error('Failed to send email:', error);
+      logger.error('Failed to send email:', { error: String(error) });
       return false;
     }
   }

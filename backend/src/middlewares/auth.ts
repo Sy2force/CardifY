@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User, { IUser } from '../models/user.model';
+import User from '../models/user.model';
 import { logger } from '../services/logger';
 import { AuthRequest } from '../types/AuthRequest';
 
-export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
@@ -12,7 +12,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { _id: string };
     const user = await User.findById(decoded._id);
     
     if (!user) {
@@ -30,20 +30,20 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
       role: user.isAdmin ? 'admin' : user.isBusiness ? 'business' : 'user'
     };
     next();
-  } catch (error) {
-    logger.error('Auth middleware error:', error);
-    res.status(401).json({ message: 'Invalid token.' });
+  } catch (error: unknown) {
+    logger.error('Auth middleware error:', { error: String(error) });
+    return res.status(401).json({ message: 'Invalid token.' });
   }
 };
 
-export const adminMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const adminMiddleware = (req: AuthRequest, res: Response, next: NextFunction): Response | void => {
   if (!req.user?.isAdmin) {
     return res.status(403).json({ message: 'Access denied. Admin rights required.' });
   }
   next();
 };
 
-export const businessMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const businessMiddleware = (req: AuthRequest, res: Response, next: NextFunction): Response | void => {
   if (!req.user?.isBusiness && !req.user?.isAdmin) {
     return res.status(403).json({ message: 'Access denied. Business account required.' });
   }

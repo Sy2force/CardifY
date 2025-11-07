@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User, Phone, CreditCard, Briefcase } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { RegisterFormData } from '../types';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
@@ -64,10 +64,23 @@ const Register: React.FC = () => {
     setIsLoading(true);
     try {
       await registerUser(data);
-      toast.success('Account created successfully! You can now sign in.');
-      navigate('/dashboard');
+      toast.success('Compte créé avec succès!');
+      // Redirect based on user role after successful registration
+      const savedUser = localStorage.getItem('cardify_user');
+      if (savedUser) {
+        const user = JSON.parse(savedUser);
+        if (user.isAdmin) {
+          navigate('/admin');
+        } else if (user.isBusiness) {
+          navigate('/dashboard');
+        } else {
+          navigate('/cards');
+        }
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
-      toast.error('Error creating account');
+      // Error is handled in AuthContext
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +107,7 @@ const Register: React.FC = () => {
             </div>
           </motion.div>
           
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2" data-testid="register-heading">
             Create Account
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
@@ -124,6 +137,7 @@ const Register: React.FC = () => {
                   <input
                     {...register('firstName')}
                     type="text"
+                    data-testid="firstName-input"
                     className={`form-input pl-10 ${
                       errors.firstName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                     }`}
@@ -142,6 +156,7 @@ const Register: React.FC = () => {
                 <input
                   {...register('lastName')}
                   type="text"
+                  data-testid="lastName-input"
                   className={`form-input ${
                     errors.lastName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                   }`}
@@ -166,6 +181,7 @@ const Register: React.FC = () => {
                   {...register('email')}
                   type="email"
                   autoComplete="email"
+                  data-testid="email-input"
                   className={`form-input pl-10 ${
                     errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                   }`}
@@ -190,6 +206,7 @@ const Register: React.FC = () => {
                   {...register('password')}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
+                  data-testid="password-input"
                   className={`form-input pl-10 pr-10 ${
                     errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                   }`}
@@ -236,22 +253,24 @@ const Register: React.FC = () => {
             </div>
 
             {/* Business Account Toggle */}
-            <div className="flex items-center">
+            <div className="flex items-start">
               <input
                 {...register('isBusiness')}
                 id="isBusiness"
                 type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-0.5"
               />
-              <div className="ml-3 flex items-center">
-                <Briefcase className="h-4 w-4 text-gray-400 mr-1" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Business Account
-                </span>
+              <div className="ml-3">
+                <div className="flex items-center mb-1">
+                  <Briefcase className="h-4 w-4 text-gray-400 mr-1" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Compte Business
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Permet de créer et gérer des cartes de visite professionnelles
+                </p>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Allows you to create and manage business cards
-              </p>
             </div>
             
             {isBusiness && (
@@ -274,6 +293,7 @@ const Register: React.FC = () => {
               loading={isLoading}
               fullWidth
               size="lg"
+              data-testid="register-button"
               className="font-semibold bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
             >
               {t('auth.register.submit')}

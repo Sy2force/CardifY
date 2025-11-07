@@ -15,7 +15,7 @@ export const createCardSchema = Joi.object({
     'string.min': 'Description must be at least 2 characters',
     'string.max': 'Description must not exceed 1000 characters'
   }),
-  phone: Joi.string().pattern(/^[\+]?[1-9][\d]{0,15}$/).required().messages({
+  phone: Joi.string().pattern(/^[+]?[1-9][\d]{0,15}$/).required().messages({
     'string.pattern.base': 'Please enter a valid phone number',
     'any.required': 'Phone is required'
   }),
@@ -73,7 +73,7 @@ export const updateCardSchema = Joi.object({
     'string.min': 'Description must be at least 2 characters',
     'string.max': 'Description must not exceed 1000 characters'
   }),
-  phone: Joi.string().pattern(/^[\+]?[\d\s\-\.\(\)]+$/).min(1).max(25).messages({
+  phone: Joi.string().pattern(/^[+]?[\d\s\-.()]+$/).min(1).max(25).messages({
     'string.pattern.base': 'Please enter a valid phone number',
     'string.min': 'Phone number must be at least 1 character',
     'string.max': 'Phone number must not exceed 25 characters'

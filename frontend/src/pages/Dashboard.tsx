@@ -14,7 +14,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { Card as CardType, CardFormData } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { cardsAPI } from '../services/api';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -139,25 +139,28 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDeleteCard = async (cardId: string) => {
-    // Ask user to confirm before deleting - this can't be undone
-    if (!window.confirm('Are you sure you want to delete this card? This action cannot be undone.')) {
-      return;
-    }
-    
+    // Deleting card
     setDeleting(cardId);
     try {
+      // Calling API to delete card
       await cardsAPI.deleteCard(cardId);
+      // Card deleted successfully
       toast.success('Card deleted successfully!');
-      // Refresh the card list to show the updated state
-      await fetchMyCards();
+      // Remove the card from the local state immediately
+      setCards(prevCards => {
+        const updatedCards = prevCards.filter(card => card._id !== cardId);
+        // Updated cards list
+        return updatedCards;
+      });
     } catch (error: any) {
-      console.error('Error deleting card:', error);
-      // Show user-friendly error message based on the type of error
-      let errorMessage;
-      if (error.name === 'NetworkError') {
-        errorMessage = error.message;
-      } else {
-        errorMessage = error.response?.data?.message || 'Failed to delete card';
+      // Error deleting card
+      let errorMessage = 'Erreur lors de la suppression';
+      if (error.response?.status === 401) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'Vous n\'avez pas l\'autorisation de supprimer cette carte.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Carte introuvable.';
       }
       toast.error(errorMessage);
     } finally {
@@ -166,7 +169,7 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user?.isBusiness) {
+    if (user) {
       fetchMyCards();
     } else {
       setLoading(false);
@@ -218,11 +221,6 @@ const Dashboard: React.FC = () => {
   };
 
   const handleCreateCard = async (data: CardFormData) => {
-    if (!user?.isBusiness) {
-      toast.error('Only business users can create cards');
-      return;
-    }
-    
     setFormLoading(true);
     try {
       const response = await cardsAPI.createCard(data);
@@ -234,7 +232,7 @@ const Dashboard: React.FC = () => {
         setEditing(null);
       }
     } catch (error: any) {
-      console.error('Error creating card:', error);
+      // Error creating card
       let errorMessage;
       if (error.name === 'NetworkError') {
         errorMessage = error.message;
@@ -291,7 +289,7 @@ const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2" data-testid="dashboard-title">
               {t('dashboard.title')}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">

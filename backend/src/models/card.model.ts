@@ -50,7 +50,7 @@ const CardSchema: Schema = new Schema({
   phone: {
     type: String,
     required: [true, 'Phone is required'],
-    match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
+    match: [/^[+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
   },
   email: {
     type: String,
@@ -61,7 +61,7 @@ const CardSchema: Schema = new Schema({
   web: {
     type: String,
     validate: {
-      validator: function(v: string) {
+      validator: function(v: string): boolean {
         if (!v || v === '') return true; // Allow empty strings
         return /^https?:\/\/.+/.test(v);
       },
@@ -128,7 +128,7 @@ const CardSchema: Schema = new Schema({
 });
 
 // Generate unique bizNumber before saving
-CardSchema.pre('save', async function(next) {
+CardSchema.pre('save', async function(next): Promise<void> {
   if (this.bizNumber) return next(); // Skip if bizNumber already exists
   
   try {
@@ -137,7 +137,7 @@ CardSchema.pre('save', async function(next) {
     
     while (!isUnique) {
       bizNumber = Math.floor(Math.random() * (9999999 - 1000000 + 1)) + 1000000;
-      const CardModel = this.constructor as mongoose.Model<any>;
+      const CardModel = this.constructor as mongoose.Model<ICard>;
       const existingCard = await CardModel.findOne({ bizNumber });
       if (!existingCard) {
         isUnique = true;

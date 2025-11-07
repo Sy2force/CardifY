@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -12,10 +12,13 @@ import {
   Building,
   Calendar,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Share2,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { Card as CardType } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { cardsAPI } from '../services/api';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
@@ -28,24 +31,43 @@ const CardDetails: React.FC = () => {
   const [card, setCard] = useState<CardType | null>(null);
   const [loading, setLoading] = useState(true);
   const [likeLoading, setLikeLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const fetchCard = useCallback(async () => {
+    if (!id) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await cardsAPI.getCardById(id);
+      setCard(response.card!);
+      setRetryCount(0);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || t('cards.error_loading');
+      setError(errorMessage);
+      
+      if (error.response?.status === 404) {
+        toast.error(t('cards.not_found'));
+        navigate('/cards');
+      } else if (retryCount < 2) {
+        // Retry up to 2 times for network errors
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          fetchCard();
+        }, 1000 * (retryCount + 1));
+      } else {
+        toast.error(errorMessage);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [id, navigate, t, retryCount]);
 
   useEffect(() => {
-    const fetchCard = async () => {
-      if (!id) return;
-      
-      try {
-        const response = await cardsAPI.getCardById(id);
-        setCard(response.card!);
-      } catch (error: any) {
-        toast.error(error.response?.data?.message || t('cards.error_loading'));
-        navigate('/cards');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCard();
-  }, [id, navigate, t]);
+  }, [fetchCard]);
 
   const handleLike = async () => {
     if (!user) {
@@ -247,24 +269,96 @@ const CardDetails: React.FC = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button
-                onClick={() => window.location.href = `mailto:${card.email}`}
-                fullWidth
-                icon={Mail}
-                className="sm:flex-1"
-              >
-                {t('cards.send_email')}
-              </Button>
-              <Button
-                onClick={() => window.location.href = `tel:${card.phone}`}
-                variant="outline"
-                fullWidth
-                icon={Phone}
-                className="sm:flex-1"
-              >
-                {t('cards.call')}
-              </Button>
+            <div className="mt-8 space-y-4">
+              {/* Primary Actions */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  onClick={() => window.location.href = `mailto:${card.email}`}
+                  fullWidth
+                  icon={Mail}
+                  className="sm:flex-1"
+                >
+                  {t('cards.send_email')}
+                </Button>
+                <Button
+                  onClick={() => window.location.href = `tel:${card.phone}`}
+                  variant="outline"
+                  fullWidth
+                  icon={Phone}
+                  className="sm:flex-1"
+                >
+                  {t('cards.call')}
+                </Button>
+              </div>
+
+              {/* Secondary Actions */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: card.title,
+                        text: card.description,
+                        url: window.location.href,
+                      }).catch(console.error);
+                    } else {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success(t('common.link_copied'));
+                    }
+                  }}
+                  variant="ghost"
+                  icon={Share2}
+                  className="sm:flex-1"
+                >
+                  {t('common.share')}
+                </Button>
+                
+                {user && (user._id === card.user_id || user.isAdmin) && (
+                  <>
+                    <Button
+                      onClick={() => navigate(`/cards/${card._id}/edit`)}
+                      variant="ghost"
+                      icon={Edit}
+                      className="sm:flex-1"
+                    >
+                      {t('common.edit')}
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        if (window.confirm(t('cards.delete_confirm'))) {
+                          try {
+                            await cardsAPI.deleteCard(card._id);
+                            toast.success(t('cards.deleted_success'));
+                            navigate('/cards');
+                          } catch (error: any) {
+                            toast.error(error.response?.data?.message || t('common.error'));
+                          }
+                        }
+                      }}
+                      variant="ghost"
+                      icon={Trash2}
+                      className="sm:flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      {t('common.delete')}
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {/* Error State with Retry */}
+              {error && (
+                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-red-700 dark:text-red-300 text-sm mb-3">{error}</p>
+                  <Button
+                    onClick={fetchCard}
+                    variant="outline"
+                    size="sm"
+                    disabled={loading}
+                  >
+                    {loading ? t('common.loading') : t('common.retry')}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 });
 
 // File filter for images only
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback): void => {
   const allowedTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
@@ -61,7 +61,7 @@ export class FileUploadService {
       }
       return false;
     } catch (error) {
-      logger.error(`Error deleting file ${filename}:`, error);
+      logger.error(`Error deleting file ${filename}:`, { error: String(error) });
       return false;
     }
   }

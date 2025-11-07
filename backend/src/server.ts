@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import morgan from 'morgan';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import path from 'path';
 import { errorHandler } from './middlewares/error';
@@ -21,10 +22,23 @@ if (process.env.NODE_ENV === 'production') {
 const app = express();
 const PORT = parseInt(process.env.PORT || '3006', 10);
 
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false
+}));
+
 // Configure middleware for CORS, logging, and request parsing
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [process.env.CLIENT_URL || 'https://cardify.vercel.app', 'https://cardify.vercel.app', 'https://www.cardify.vercel.app']
-  : ['http://localhost:3008', 'http://localhost:3000', 'http://localhost:5173'];
+  : ['http://localhost:3008', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:3010'];
 
 app.use(cors({
   origin: allowedOrigins,
@@ -58,51 +72,48 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Connect to MongoDB and start the server
-const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
-console.log('Attempting to connect to MongoDB...');
-console.log('MongoDB URI (masked):', mongoUri.replace(/\/\/.*@/, '//***:***@'));
-
 // Configure mongoose with better timeout settings
 mongoose.set('strictQuery', false);
 
-// Start server even if MongoDB fails initially
-app.listen(PORT, '0.0.0.0', () => {
-  logger.info(`Server running on port ${PORT}`);
-  console.log(`🚀 Cardify API server running on port ${PORT}`);
-});
+// Only connect to MongoDB and start server if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  // Connect to MongoDB and start the server
+  const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
+  logger.info('Attempting to connect to MongoDB...');
+  logger.info('MongoDB URI (masked):', { uri: mongoUri.replace(/\/\/.*@/, '//***:***@') });
 
-const connectWithRetry = () => {
-  mongoose.connect(mongoUri, {
-    serverSelectionTimeoutMS: 10000, // 10 seconds
-    socketTimeoutMS: 20000, // 20 seconds
-    connectTimeoutMS: 10000, // 10 seconds
-    maxPoolSize: 5,
-    minPoolSize: 1,
-    maxIdleTimeMS: 30000,
-    retryWrites: true,
-    w: 'majority',
-    authSource: 'admin'
-  })
-  .then(() => {
-    logger.info('Connected to MongoDB successfully');
-    console.log('✅ MongoDB connected');
-  })
-  .catch((error) => {
-    logger.error('Database connection error:', error);
-    console.error('❌ MongoDB connection failed:', error.message);
-    
-    // Don't retry indefinitely in production
-    if (process.env.NODE_ENV === 'production') {
-      console.log('Production environment - will not retry MongoDB connection');
-      return;
-    }
-    
-    console.log('Retrying connection in 10 seconds...');
-    setTimeout(connectWithRetry, 10000);
+  const connectWithRetry = (): void => {
+    mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 10000, // 10 seconds
+      socketTimeoutMS: 20000, // 20 seconds
+      connectTimeoutMS: 10000, // 10 seconds
+      maxPoolSize: 5,
+      minPoolSize: 1,
+      maxIdleTimeMS: 30000,
+      retryWrites: true,
+      authSource: 'admin'
+    }).then(() => {
+      logger.info('✅ MongoDB connected successfully');
+    }).catch((error) => {
+      logger.error('❌ MongoDB connection failed:', { error: error.message });
+      
+      if (process.env.NODE_ENV === 'production') {
+        // In production, retry less aggressively
+        setTimeout(connectWithRetry, 30000);
+        return;
+      }
+      
+      logger.info('Retrying connection in 10 seconds...');
+      setTimeout(connectWithRetry, 10000);
+    });
+  };
+
+  connectWithRetry();
+
+  // Start the server
+  app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`🚀 Cardify API server running on port ${PORT}`);
   });
-};
-
-connectWithRetry();
+}
 
 export default app;

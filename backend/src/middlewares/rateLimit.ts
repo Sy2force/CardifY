@@ -4,10 +4,8 @@ import { logger } from '../services/logger';
 // General rate limiting
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    message: 'Too many requests from this IP, please try again later.',
-  },
+  max: process.env.NODE_ENV === 'test' ? 10000 : 100, // Higher limit in test environment
+  message: { message: 'Too many requests from this IP, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
@@ -21,10 +19,8 @@ export const generalLimiter = rateLimit({
 // Strict rate limiting for auth endpoints
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
-  message: {
-    message: 'Too many authentication attempts, please try again later.',
-  },
+  max: process.env.NODE_ENV === 'test' ? 1000 : 5, // No rate limiting in test environment
+  message: { message: 'Too many authentication attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {

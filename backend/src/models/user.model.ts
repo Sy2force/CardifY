@@ -1,5 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { logger } from '../services/logger';
 
 export interface IUser extends Document {
   _id: string;
@@ -44,7 +45,7 @@ const UserSchema: Schema = new Schema({
   },
   phone: {
     type: String,
-    match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
+    match: [/^[+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
   },
   isAdmin: {
     type: Boolean,
@@ -79,13 +80,13 @@ UserSchema.methods.comparePassword = async function(password: string): Promise<b
     }
     return await bcrypt.compare(password, this.password);
   } catch (error) {
-    console.error('Password comparison error:', error);
+    logger.error('Password comparison error', { error: String(error) });
     throw error;
   }
 };
 
 // Remove password from JSON output
-UserSchema.methods.toJSON = function() {
+UserSchema.methods.toJSON = function(): Record<string, unknown> {
   const userObject = this.toObject();
   delete userObject.password;
   return userObject;

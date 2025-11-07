@@ -10,7 +10,7 @@ import { createProjectCards } from './project-cards';
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
-const seedData = async () => {
+const seedData = async (): Promise<void> => {
   try {
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/cardify');
@@ -54,7 +54,7 @@ const seedData = async () => {
     logger.info(`Created ${createdUsers.length} demo users`);
 
     // Create demo cards for business users
-    const businessUsers = createdUsers.filter((user: any) => user.isBusiness);
+    const businessUsers = createdUsers.filter((user: { isBusiness: boolean }) => user.isBusiness);
     
     const cards = [
       {
@@ -199,17 +199,16 @@ const seedData = async () => {
     logger.info(`Created ${projectCards.length} project cards`);
 
     logger.info('Database seeded successfully!');
-    console.log('\n🌱 Database seeded with demo data:');
-    console.log('👤 Demo Users:');
-    console.log('  - admin@cardify.com (password: admin123) - Admin');
-    console.log('  - sarah@example.com (password: business123) - Business User');
-    console.log('  - john@example.com (password: user123) - Regular User');
-    console.log(`🃏 ${createdCards.length + projectCards.length} total cards created`);
-    console.log(`📋 ${projectCards.length} project showcase cards added`);
+    logger.info('\n🌱 Database seeded with demo data:');
+    logger.info('👤 Demo Users:');
+    logger.info('  - admin@cardify.com (password: admin123) - Admin');
+    logger.info('  - sarah@example.com (password: business123) - Business User');
+    logger.info('  - john@example.com (password: user123) - Regular User');
+    logger.info(`🃏 ${createdCards.length + projectCards.length} total cards created`);
+    logger.info(`📋 ${projectCards.length} project showcase cards added`);
 
   } catch (error) {
-    logger.error('Seeding error:', error);
-    console.error('❌ Seeding failed:', error);
+    logger.error('Seeding error:', { error: String(error) });
   } finally {
     await mongoose.disconnect();
     process.exit(0);

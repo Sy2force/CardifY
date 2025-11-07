@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Loader2, Search } from 'lucide-react';
 import { Card as CardType } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { cardsAPI } from '../services/api';
 import Card from '../components/Card';
 import toast from 'react-hot-toast';
@@ -14,7 +14,7 @@ const Favorites = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [likeLoading, setLikeLoading] = useState<string | null>(null);
 
-  const fetchFavoriteCards = async () => {
+  const fetchFavoriteCards = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
@@ -33,11 +33,11 @@ const Favorites = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchFavoriteCards();
-  }, [user]);
+  }, [user, fetchFavoriteCards]);
 
   const handleUnlike = async (cardId: string) => {
     if (!user) return;

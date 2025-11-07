@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Search, Plus, Loader2 } from 'lucide-react';
+import { Search, Plus, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { Card as CardType } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { cardsAPI } from '../services/api';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -16,71 +16,76 @@ const Cards = () => {
   const navigate = useNavigate();
   const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [likeLoading, setLikeLoading] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const fetchCards = async (pageNum: number = 1, reset: boolean = false) => {
-    setLoading(true);
+    if (reset) {
+      setLoading(true);
+      setError(null);
+    }
     
     try {
-      console.log('Fetching cards, page:', pageNum);
       const response = await cardsAPI.getAllCards(pageNum, 12);
-      console.log('Cards response:', response);
       
-      // Check if we got a valid response from the server
       if (!response) {
-        throw new Error('No response from server');
+        throw new Error('Aucune réponse du serveur');
       }
       
-      // Verify the response structure is what we expect
-      if (response.cards && Array.isArray(response.cards)) {
+      if (response.success && response.cards && Array.isArray(response.cards)) {
+        const newCards = response.cards;
+        
         if (reset) {
-          setCards(response.cards);
+          setCards(newCards);
         } else {
-          setCards(prev => [...prev, ...(response.cards || [])]);
+          setCards(prev => [...prev, ...newCards]);
         }
         
         setHasMore(
-          response.pagination ? 
-          pageNum < response.pagination.pages : 
-          false
+          Boolean(response.pagination && pageNum < response.pagination.pages)
         );
         
         setPage(pageNum);
-        console.log('Cards loaded successfully, count:', response.cards.length);
+        setError(null);
+        setRetryCount(0);
+        
+        if (reset && newCards.length === 0) {
+          setError('Aucune carte disponible pour le moment');
+        }
       } else {
-        // Handle unexpected response format gracefully
-        console.warn('Unexpected response format:', response);
+        console.warn('Format de réponse inattendu:', response);
         if (reset) {
           setCards([]);
+          setError('Aucune carte trouvée');
         }
         setHasMore(false);
-        
-        // Show informative message instead of error if there are just no cards
-        if (pageNum === 1) {
-          toast('No cards available at the moment', { icon: 'ℹ️' });
-        }
       }
     } catch (error: any) {
-      console.error('Error loading cards:', error);
-      let errorMessage;
+      console.error('Erreur lors du chargement des cartes:', error);
+      
+      let errorMessage = 'Erreur lors du chargement des cartes';
+      
       if (error.name === 'NetworkError') {
-        errorMessage = error.message;
+        errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
       } else if (!error.response) {
-        errorMessage = 'Unable to connect to server. Check your connection.';
+        errorMessage = 'Serveur inaccessible. Vérifiez votre connexion internet.';
       } else if (error.response.status === 404) {
-        errorMessage = 'No cards found.';
+        errorMessage = 'Aucune carte trouvée.';
       } else if (error.response.status >= 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else {
-        errorMessage = error.response?.data?.message || 'Error loading cards';
+        errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
       }
-      toast.error(errorMessage);
       
       if (reset) {
         setCards([]);
+        setError(errorMessage);
+      } else {
+        toast.error(errorMessage);
       }
       setHasMore(false);
     } finally {
@@ -91,6 +96,11 @@ const Cards = () => {
   useEffect(() => {
     fetchCards(1, true);
   }, []);
+  
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    fetchCards(1, true);
+  };
 
   const handleLike = async (cardId: string) => {
     if (!user) {
@@ -185,6 +195,7 @@ const Cards = () => {
                 placeholder={t('cards.search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                data-testid="search-input"
                 className="form-input pl-10 w-full"
               />
             </div>
@@ -202,47 +213,98 @@ const Cards = () => {
           </div>
         </motion.div>
 
-        {/* Cards Grid */}
-        {loading && page === 1 ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-            <span className="ml-2 text-gray-600 dark:text-gray-400">
-              {t('cards.loading')}
+        {/* Error State */}
+        {error && !loading ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 max-w-md mx-auto">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
+                Erreur de chargement
+              </h3>
+              <p className="text-red-600 dark:text-red-300 mb-6">
+                {error}
+              </p>
+              <div className="space-y-3">
+                <Button
+                  onClick={handleRetry}
+                  icon={RefreshCw}
+                  className="w-full"
+                >
+                  Réessayer {retryCount > 0 && `(${retryCount})`}
+                </Button>
+                {user && user.isBusiness && (
+                  <Button
+                    onClick={() => navigate('/dashboard')}
+                    variant="outline"
+                    icon={Plus}
+                    className="w-full"
+                  >
+                    Créer une carte
+                  </Button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        ) : loading && page === 1 ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-12 h-12 animate-spin text-primary-600 mb-4" />
+            <span className="text-lg text-gray-600 dark:text-gray-400 mb-2">
+              Chargement des cartes...
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-500">
+              Veuillez patienter
             </span>
           </div>
-        ) : filteredCards.length === 0 ? (
+        ) : filteredCards.length === 0 && !error ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-12"
           >
-            <div className="text-6xl mb-4">🃏</div>
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">
-              {t('cards.no_cards')}
-            </p>
-            {user && user.isBusiness && (
-              <Button
-                onClick={() => navigate('/dashboard')}
-                icon={Plus}
-              >
-                {t('cards.create')}
-              </Button>
-            )}
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-8 max-w-md mx-auto">
+              <div className="text-6xl mb-4">🃏</div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Aucune carte trouvée
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                {searchTerm ? 'Aucune carte ne correspond à votre recherche.' : 'Aucune carte disponible pour le moment.'}
+              </p>
+              {user && user.isBusiness && (
+                <Button
+                  onClick={() => navigate('/dashboard')}
+                  icon={Plus}
+                  className="w-full"
+                >
+                  Créer la première carte
+                </Button>
+              )}
+            </div>
           </motion.div>
         ) : (
           <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ staggerChildren: 0.1 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              transition={{ staggerChildren: 0.05 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              data-testid="cards-grid"
             >
               {filteredCards.map((card, index) => (
                 <motion.div
-                  key={card._id}
-                  initial={{ opacity: 0, y: 20 }}
+                  key={`${card._id}-${index}`}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ 
+                    delay: index * 0.03,
+                    duration: 0.4,
+                    ease: "easeOut"
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  className="h-full"
                 >
                   <Card
                     card={card}
@@ -255,16 +317,27 @@ const Cards = () => {
 
             {/* Load More Button */}
             {hasMore && (
-              <div className="text-center mt-12">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center mt-12"
+              >
                 <Button
                   onClick={loadMore}
-                  loading={loading}
+                  loading={loading && page > 1}
                   variant="outline"
                   size="lg"
+                  data-testid="load-more-button"
+                  className="min-w-[200px]"
                 >
-                  {t('cards.load_more')}
+                  {loading && page > 1 ? 'Chargement...' : 'Charger plus de cartes'}
                 </Button>
-              </div>
+                {cards.length > 0 && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    {cards.length} carte{cards.length > 1 ? 's' : ''} affichée{cards.length > 1 ? 's' : ''}
+                  </p>
+                )}
+              </motion.div>
             )}
           </>
         )}

@@ -1,12 +1,19 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
+import { Response } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import User from '../models/user.model';
+import { AuthRequest } from '../types/AuthRequest';
 import { registerSchema, loginSchema, updateUserSchema } from '../validations/user.validation';
 import { logger } from '../services/logger';
-import { AuthRequest } from '../types/AuthRequest';
+// import { sendEmail } from '../services/email';
 
-const generateToken = (user: any): string => {
+interface TokenUser {
+  _id: string;
+  isAdmin: boolean;
+  isBusiness: boolean;
+}
+
+const generateToken = (user: TokenUser): string => {
   return jwt.sign(
     { 
       _id: user._id, 
@@ -18,7 +25,7 @@ const generateToken = (user: any): string => {
   );
 };
 
-export const register = async (req: AuthRequest, res: Response) => {
+export const register = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const { error } = registerSchema.validate(req.body);
     if (error) {
@@ -27,13 +34,14 @@ export const register = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const { firstName, lastName, email, password, phone, isBusiness } = req.body;
+    const { firstName, lastName, email, password, phone, isBusiness, isAdmin } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ 
-        message: 'User with this email already exists' 
+        success: false,
+        message: 'Un utilisateur avec cet email existe déjà' 
       });
     }
 
@@ -44,27 +52,29 @@ export const register = async (req: AuthRequest, res: Response) => {
       email,
       password,
       phone,
-      isBusiness: isBusiness || false
+      isBusiness: isBusiness || false,
+      isAdmin: isAdmin || false
     });
 
     await user.save();
     
     const token = generateToken(user);
-    
-    logger.info(`User registered: ${email}`);
-    
+
+    logger.info(`User registered: ${user.email}`);
+
     res.status(201).json({
+      success: true,
       message: 'User registered successfully',
-      user,
+      user: user.toJSON(),
       token
     });
   } catch (error) {
-    logger.error('Registration error:', error);
+    logger.error('Register error:', { error: String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-export const login = async (req: AuthRequest, res: Response) => {
+export const login = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const { error } = loginSchema.validate(req.body);
     if (error) {
@@ -79,7 +89,8 @@ export const login = async (req: AuthRequest, res: Response) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ 
-        message: 'Invalid email or password' 
+        success: false,
+        message: 'Email ou mot de passe incorrect' 
       });
     }
 
@@ -93,48 +104,63 @@ export const login = async (req: AuthRequest, res: Response) => {
     }
 
     // Direct bcrypt comparison
-    const bcrypt = require('bcryptjs');
     const isMatch = await bcrypt.compare(password, userWithPassword.password);
     
     if (!isMatch) {
       logger.info(`Failed login attempt for: ${email}`);
       return res.status(400).json({ 
-        message: 'Invalid email or password' 
+        success: false,
+        message: 'Email ou mot de passe incorrect' 
       });
     }
 
     const token = generateToken(user);
     
-    logger.info(`User logged in: ${email}`);
+    logger.info(`User logged in: ${user.email}`);
     
     res.json({
+      success: true,
       message: 'Login successful',
       user: user.toJSON(),
       token
     });
-  } catch (error: any) {
-    logger.error('Login error:', error.message || error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Login error:', { error: String(error) });
     res.status(500).json({ 
       message: 'Server error',
-      ...(process.env.NODE_ENV === 'development' && { error: error.message })
+      ...(process.env.NODE_ENV === 'development' && { error: errorMessage })
     });
   }
 };
 
-export const getProfile = async (req: AuthRequest, res: Response) => {
+export const getProfile = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+    
     res.json({
+      success: true,
       message: 'Profile retrieved successfully',
-      user
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isBusiness: user.isBusiness,
+        role: user.role
+      }
     });
   } catch (error) {
-    logger.error('Get profile error:', error);
+    logger.error('Get profile error:', { error: String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-export const updateProfile = async (req: AuthRequest, res: Response) => {
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const { error } = updateUserSchema.validate(req.body);
     if (error) {
@@ -159,16 +185,17 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     logger.info(`User profile updated: ${user.email}`);
 
     res.json({
+      success: true,
       message: 'Profile updated successfully',
-      user
+      user: user.toJSON()
     });
   } catch (error) {
-    logger.error('Update profile error:', error);
+    logger.error('Update profile error:', { error: String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-export const getAllUsers = async (req: AuthRequest, res: Response) => {
+export const getAllUsers = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -192,12 +219,12 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
       }
     });
   } catch (error) {
-    logger.error('Get all users error:', error);
+    logger.error('Get all users error:', { error: String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-export const deleteUser = async (req: AuthRequest, res: Response) => {
+export const deleteProfile = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const userId = req.params.id;
     
@@ -206,11 +233,11 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    logger.info(`User deleted: ${user.email}`);
+    logger.info(`User login: ${user.email}`);
 
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    logger.error('Delete user error:', error);
+    logger.error('Delete user error:', { error: String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 };

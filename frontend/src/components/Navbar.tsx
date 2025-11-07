@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 import { useTranslation } from 'react-i18next';
 import { Menu, X, User, LogOut, Sun, Moon, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -149,6 +149,7 @@ const Navbar = () => {
                     variant="outline"
                     size="sm"
                     icon={LogOut}
+                    data-testid="logout-button"
                   >
                     {t('navigation.logout')}
                   </Button>
@@ -160,6 +161,7 @@ const Navbar = () => {
                   onClick={() => navigate('/login')}
                   variant="ghost"
                   size="sm"
+                  data-testid="navbar-login-button"
                 >
                   {t('navigation.login')}
                 </Button>
@@ -192,6 +194,7 @@ const Navbar = () => {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 p-2"
+              data-testid="mobile-menu-button"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>

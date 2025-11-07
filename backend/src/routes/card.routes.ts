@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 import {
   createCard,
   getAllCards,
@@ -8,12 +8,11 @@ import {
   deleteCard,
   likeCard
 } from '../controllers/card.controller';
-import { authMiddleware, businessMiddleware } from '../middlewares/auth';
-import { validate } from '../middlewares/validation';
+import { authMiddleware } from '../middlewares/auth';
 import { cardLimiter } from '../middlewares/rateLimit';
 import { createCardValidation, updateCardValidation } from '../validations/card.validation';
 
-const router = express.Router();
+const router = Router();
 
 // Public routes
 router.get('/', getAllCards);

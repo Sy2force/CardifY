@@ -3,7 +3,7 @@ import { AuthRequest } from '../types/AuthRequest';
 import { FileUploadService } from '../services/fileUpload';
 import { logger } from '../services/logger';
 
-export const uploadImage = async (req: AuthRequest, res: Response) => {
+export const uploadImage = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -35,12 +35,12 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
       }
     });
   } catch (error) {
-    logger.error('Upload image error:', error);
+    logger.error('Upload image error:', { error: String(error) });
     res.status(500).json({ message: 'Server error during file upload' });
   }
 };
 
-export const deleteImage = async (req: AuthRequest, res: Response) => {
+export const deleteImage = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const { filename } = req.params;
     
@@ -63,7 +63,7 @@ export const deleteImage = async (req: AuthRequest, res: Response) => {
       });
     }
   } catch (error) {
-    logger.error('Delete image error:', error);
+    logger.error('Delete image error:', { error: String(error) });
     res.status(500).json({ message: 'Server error during file deletion' });
   }
 };

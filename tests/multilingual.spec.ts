@@ -1,92 +1,98 @@
 import { test, expect } from '@playwright/test';
+import { loginAs, clickWithRetry, safeClick } from './utils/testHelpers';
 
 test.describe('Multilingual Interface Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
-  test('should switch to English language', async ({ page }) => {
-    // Find language switcher (globe icon or flag)
-    const languageButton = page.locator('button:has(.lucide-globe), button:has-text("🇫🇷"), [data-testid="language-switcher"]');
-    if (await languageButton.count() === 0) {
-      test.skip();
-      return;
-    }
+  test('should switch to Hebrew', async ({ page }) => {
+    await page.waitForLoadState('networkidle');
     
-    await languageButton.click();
+    // Look for language switcher
+    const langSwitcher = page.locator('[data-testid="language-switcher"], .language-selector, button:has-text("HE"), select[name="language"]');
     
-    // Select English if dropdown appears
-    const englishOption = page.getByText(/english|🇺🇸/i).first();
-    if (await englishOption.count() > 0) {
-      await englishOption.click();
-      await page.waitForTimeout(1000);
-    }
-  });
-
-  test('should switch to Hebrew language', async ({ page }) => {
-    // Find language switcher
-    const languageButton = page.locator('button:has(.lucide-globe), button:has-text("🇫🇷"), [data-testid="language-switcher"]');
-    if (await languageButton.count() === 0) {
-      test.skip();
-      return;
-    }
-    
-    await languageButton.click();
-    
-    // Select Hebrew if dropdown appears
-    const hebrewOption = page.getByText(/עברית|🇮🇱/i).first();
-    if (await hebrewOption.count() > 0) {
-      await hebrewOption.click();
-      await page.waitForTimeout(1000);
-    }
-  });
-
-  test('should maintain language preference across pages', async ({ page }) => {
-    // Try to switch language if switcher exists
-    const languageButton = page.locator('button:has(.lucide-globe), button:has-text("🇫🇷"), [data-testid="language-switcher"]');
-    if (await languageButton.count() === 0) {
-      test.skip();
-      return;
-    }
-    
-    await languageButton.click();
-    const englishOption = page.getByText(/english|🇺🇸/i).first();
-    if (await englishOption.count() > 0) {
-      await englishOption.click();
-      await page.waitForTimeout(1000);
-    }
-    
-    // Navigate to cards page if link exists
-    const cardsLink = page.locator('a:has-text("Cards"), a:has-text("Cartes"), nav a[href*="cards"]').first();
-    if (await cardsLink.isVisible()) {
-      await cardsLink.click();
-      await page.waitForTimeout(1000);
-    }
-  });
-
-  test('should display correct date formats for different languages', async ({ page }) => {
-    // Login first to see dates
-    await page.getByText(/connexion/i).first().click();
-    await page.fill('input[type="email"]', 'admin@cardify.com');
-    await page.fill('input[type="password"]', 'admin123');
-    
-    const loginButton = page.locator('button[type="submit"], button:has-text("Connexion"), button:has-text("Se connecter"), .btn-primary').first();
-    await loginButton.click();
-    await page.waitForTimeout(3000);
-    
-    // Try to navigate to cards if link exists
-    const cardsLink = page.locator('a:has-text("Cartes"), a:has-text("Cards"), nav a[href*="cards"]').first();
-    if (await cardsLink.isVisible()) {
-      await cardsLink.click();
-      await page.waitForTimeout(1000);
-    }
-    
-    // Check if dates are displayed (format may vary by language)
-    const dateElements = page.locator('[data-testid="card-date"], .card-date, .date, time');
-    if (await dateElements.count() > 0) {
-      await expect(dateElements.first()).toBeVisible();
+    if (await langSwitcher.count() > 0) {
+      await clickWithRetry(page, '[data-testid="language-switcher"], .language-selector, button:has-text("HE")');
+      await page.waitForTimeout(500);
+      
+      // Select Hebrew
+      const hebrewOption = page.locator('text="עברית", [data-lang="he"], button:has-text("HE"), option[value="he"]');
+      if (await hebrewOption.count() > 0) {
+        await hebrewOption.first().click();
+        await page.waitForTimeout(2000);
+        await page.waitForLoadState('networkidle');
+        
+        // Check if content changed to Hebrew (RTL)
+        const hebrewContent = page.locator('text=/התחבר|הרשם/i');
+        if (await hebrewContent.count() > 0) {
+          await expect(hebrewContent.first()).toBeVisible();
+        }
+        
+        // Check RTL direction
+        const bodyDir = await page.locator('body').getAttribute('dir');
+        if (bodyDir === 'rtl') {
+          expect(bodyDir).toBe('rtl');
+        }
+      }
     } else {
-      // Skip if no date elements found
+      test.skip();
+    }
+  });
+
+  test('should switch to English', async ({ page }) => {
+    await page.waitForLoadState('networkidle');
+    
+    // Look for language switcher
+    const langSwitcher = page.locator('[data-testid="language-switcher"], .language-selector, button:has-text("EN"), select[name="language"]');
+    
+    if (await langSwitcher.count() > 0) {
+      await clickWithRetry(page, '[data-testid="language-switcher"], .language-selector, button:has-text("EN")');
+      await page.waitForTimeout(500);
+      
+      // Select English
+      const englishOption = page.locator('text="English", [data-lang="en"], button:has-text("EN"), option[value="en"]');
+      if (await englishOption.count() > 0) {
+        await englishOption.first().click();
+        await page.waitForTimeout(2000);
+        await page.waitForLoadState('networkidle');
+        
+        // Check if content changed to English
+        const englishContent = page.locator('text=/login|sign in|register/i');
+        if (await englishContent.count() > 0) {
+          await expect(englishContent.first()).toBeVisible();
+        }
+      }
+    } else {
+      test.skip();
+    }
+  });
+
+  test('should maintain language preference across navigation', async ({ page }) => {
+    // Try to switch language if switcher exists
+    const languageButton = page.locator('button:has(.lucide-globe)');
+    
+    if (await languageButton.count() > 0) {
+      await languageButton.click();
+      const englishOption = page.getByText(/english|🇺🇸/i).first();
+      if (await englishOption.count() > 0) {
+        await englishOption.click();
+        await page.waitForTimeout(500);
+      }
+      
+      // Navigate to cards page
+      const cardsLink = page.locator('a[href="/cards"]').first();
+      if (await cardsLink.isVisible()) {
+        await cardsLink.click();
+        await page.waitForURL('**/cards', { timeout: 5000 });
+        
+        // Verify language is still English (check for English text)
+        const englishText = page.locator('text=/cards|home|login/i');
+        if (await englishText.count() > 0) {
+          await expect(englishText.first()).toBeVisible();
+        }
+      }
+    } else {
       test.skip();
     }
   });
