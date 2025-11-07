@@ -75,7 +75,7 @@ describe('Auth Endpoints', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('User registered successfully');
+      expect(response.body.message).toBe('Inscription réussie');
       expect(response.body.user).toBeDefined();
       expect(response.body.token).toBeDefined();
       expect(response.body.user.email).toBe(userData.email);
@@ -151,7 +151,7 @@ describe('Auth Endpoints', () => {
       
       if (response.status === 200) {
         expect(response.body.success).toBe(true);
-        expect(response.body.message).toBe('Login successful');
+        expect(response.body.message).toBe('Connexion réussie');
         expect(response.body.user).toBeDefined();
         expect(response.body.token).toBeDefined();
         expect(response.body.user.email).toBe(loginData.email);
@@ -177,7 +177,7 @@ describe('Auth Endpoints', () => {
       expect(response.status).toBe(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('Login successful');
+      expect(response.body.message).toBe('Connexion réussie');
       expect(response.body.user).toBeDefined();
       expect(response.body.token).toBeDefined();
       expect(response.body.user.email).toBe(loginData.email);
@@ -247,7 +247,7 @@ describe('Auth Endpoints', () => {
       expect(response.status).toBe(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('Profile retrieved successfully');
+      expect(response.body.message).toBe('Profil récupéré avec succès');
       expect(response.body.user).toBeDefined();
       expect(response.body.user.email).toBe('admin@cardify.com');
       expect(response.body.user.isAdmin).toBe(true);
