@@ -39,7 +39,7 @@ app.use(helmet({
 
 // Configuration CORS : autorise les requêtes depuis le frontend
 const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? [process.env.CLIENT_URL || 'https://cardify.vercel.app', 'https://cardify.vercel.app', 'https://www.cardify.vercel.app']
+  ? [process.env.CLIENT_URL || 'https://cardif-y.vercel.app', 'https://cardif-y.vercel.app', 'https://www.cardif-y.vercel.app']
   : ['http://localhost:3008', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:3010']; // Ports de dev courants
 
 app.use(cors({
