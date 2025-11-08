@@ -3,7 +3,7 @@ services:
     name: cardify-backend-new
     env: node
     plan: free
-    rootDir: ./backend
+    rootDir: ./app/backend
     buildCommand: npm install && npm run build
     startCommand: node dist/server.js
     envVars:
