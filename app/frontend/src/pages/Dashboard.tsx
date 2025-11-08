@@ -96,13 +96,17 @@ const Dashboard: React.FC = () => {
       } else {
         setCards([]);
       }
-    } catch (error: any) {
-      console.error('Error fetching cards:', error);
-      let errorMessage;
-      if (error.name === 'NetworkError') {
-        errorMessage = error.message;
-      } else {
-        errorMessage = error.response?.data?.message || 'Failed to load cards';
+    } catch (error: unknown) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching cards:', error);
+      }
+      let errorMessage = 'Failed to load cards';
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'NetworkError' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      } else if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || 'Failed to load cards';
       }
       toast.error(errorMessage);
       setCards([]);
@@ -157,10 +161,13 @@ const Dashboard: React.FC = () => {
       let errorMessage = 'Erreur lors de la suppression';
       if (error.response?.status === 401) {
         errorMessage = 'Session expirée. Veuillez vous reconnecter.';
-      } else if (error.response?.status === 403) {
-        errorMessage = 'Vous n\'avez pas l\'autorisation de supprimer cette carte.';
-      } else if (error.response?.status === 404) {
-        errorMessage = 'Carte introuvable.';
+      } else if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status: number; data?: { message?: string } } };
+        if (axiosError.response?.status === 401) {
+          errorMessage = 'Vous n\'avez pas l\'autorisation de supprimer cette carte.';
+        } else if (axiosError.response?.status === 404) {
+          errorMessage = 'Carte introuvable.';
+        }
       }
       toast.error(errorMessage);
     } finally {

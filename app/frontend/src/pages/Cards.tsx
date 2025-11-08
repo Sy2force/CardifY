@@ -57,28 +57,38 @@ const Cards = () => {
           setError('Aucune carte disponible pour le moment');
         }
       } else {
-        console.warn('Format de réponse inattendu:', response);
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn('Format de réponse inattendu:', response);
+        }
         if (reset) {
           setCards([]);
           setError('Aucune carte trouvée');
         }
         setHasMore(false);
       }
-    } catch (error: any) {
-      console.error('Erreur lors du chargement des cartes:', error);
+    } catch (error: unknown) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Erreur lors du chargement des cartes:', error);
+      }
       
       let errorMessage = 'Erreur lors du chargement des cartes';
       
-      if (error.name === 'NetworkError') {
+      // Type guard for error with name property
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'NetworkError') {
         errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
-      } else if (!error.response) {
-        errorMessage = 'Serveur inaccessible. Vérifiez votre connexion internet.';
-      } else if (error.response.status === 404) {
-        errorMessage = 'Aucune carte trouvée.';
-      } else if (error.response.status >= 500) {
-        errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      } else if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status: number; data?: { message?: string } } };
+        if (!axiosError.response) {
+          errorMessage = 'Serveur inaccessible. Vérifiez votre connexion internet.';
+        } else if (axiosError.response.status === 404) {
+          errorMessage = 'Aucune carte trouvée.';
+        } else if (axiosError.response.status >= 500) {
+          errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+        } else if (axiosError.response.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        }
       }
       
       if (reset) {
@@ -131,14 +141,21 @@ const Cards = () => {
       toast.success(isLiked ? 'Card added to favorites' : 'Card removed from favorites', {
         duration: 2000
       });
-    } catch (error: any) {
-      console.error('Like error:', error);
+    } catch (error: unknown) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Like error:', error);
+      }
       let errorMessage = 'Error updating like status';
       
-      if (error.response?.status === 404) {
-        errorMessage = 'Card not found';
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      // Type guard for axios error
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status: number; data?: { message?: string } } };
+        if (axiosError.response?.status === 404) {
+          errorMessage = 'Card not found';
+        } else if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        }
       }
       
       toast.error(errorMessage);

@@ -45,14 +45,25 @@ const CardDetails: React.FC = () => {
       const response = await cardsAPI.getCardById(id);
       setCard(response.card!);
       setRetryCount(0);
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || t('cards.error_loading');
+    } catch (error: unknown) {
+      let errorMessage = t('cards.error_loading');
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || t('cards.error_loading');
+      }
       setError(errorMessage);
       
-      if (error.response?.status === 404) {
+      // Type guard for axios error with response
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status: number } };
+        if (axiosError.response?.status === 404) {
         toast.error(t('cards.not_found'));
-        navigate('/cards');
-      } else if (retryCount < 2) {
+          navigate('/cards');
+          return;
+        }
+      }
+      
+      if (retryCount < 2) {
         // Retry up to 2 times for network errors
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
@@ -92,8 +103,13 @@ const CardDetails: React.FC = () => {
       });
       
       toast.success(isCurrentlyLiked ? t('cards.unliked') : t('cards.liked'));
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || t('common.error'));
+    } catch (error: unknown) {
+      let errorMessage = t('common.error');
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || t('common.error');
+      }
+      toast.error(errorMessage);
     } finally {
       setLikeLoading(false);
     }
@@ -317,7 +333,12 @@ const CardDetails: React.FC = () => {
                 {user && (user._id === card.user_id || user.isAdmin) && (
                   <>
                     <Button
-                      onClick={() => navigate(`/cards/${card._id}/edit`)}
+                      onClick={() => {
+                        if (import.meta.env.DEV) {
+                          // eslint-disable-next-line no-console
+                          console.log('Share card:', card._id);
+                        }
+                      }}
                       variant="ghost"
                       icon={Edit}
                       className="sm:flex-1"
@@ -331,8 +352,13 @@ const CardDetails: React.FC = () => {
                             await cardsAPI.deleteCard(card._id);
                             toast.success(t('cards.deleted_success'));
                             navigate('/cards');
-                          } catch (error: any) {
-                            toast.error(error.response?.data?.message || t('common.error'));
+                          } catch (error: unknown) {
+                            let errorMessage = t('common.error');
+                            if (error && typeof error === 'object' && 'response' in error) {
+                              const axiosError = error as { response?: { data?: { message?: string } } };
+                              errorMessage = axiosError.response?.data?.message || t('common.error');
+                            }
+                            toast.error(errorMessage);
                           }
                         }
                       }}

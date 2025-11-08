@@ -27,8 +27,12 @@ const Favorites = () => {
         );
         setFavoriteCards(likedCards);
       }
-    } catch (error: any) {
-      console.error('Error loading favorite cards:', error);
+    } catch (error: unknown) {
+      // Log error in development only
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Error loading favorite cards:', error);
+      }
       toast.error('Error loading favorites');
     } finally {
       setLoading(false);
@@ -50,8 +54,12 @@ const Favorites = () => {
       setFavoriteCards(prev => prev.filter(card => card._id !== cardId));
       
       toast.success('Card removed from favorites', { duration: 2000 });
-    } catch (error: any) {
-      console.error('Unlike error:', error);
+    } catch (error: unknown) {
+      // Log error in development only
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Unlike error:', error);
+      }
       toast.error('Error removing from favorites');
     } finally {
       setLikeLoading(null);
