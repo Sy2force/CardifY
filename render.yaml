@@ -6,3 +6,4 @@ services:
     rootDir: ./app/backend
     buildCommand: npm install && npm run build
     startCommand: node dist/server.js
+    # Force deployment with latest fixes - Nov 8, 2024
