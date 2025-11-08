@@ -1,101 +1,51 @@
 // Serveur principal de l'API Cardify - Point d'entrée de l'application
 import express from 'express';
 import cors from 'cors';
-import morgan from 'morgan';
-import helmet from 'helmet';
 import dotenv from 'dotenv';
-import path from 'path';
-import fs from 'fs';
-import { errorHandler } from './middlewares/error';
-import { generalLimiter } from './middlewares/rateLimit';
-import userRoutes from './routes/user.routes';
-import cardRoutes from './routes/card.routes';
-import uploadRoutes from './routes/upload.routes';
-import { logger } from './services/logger';
-import { connectDB } from './utils/database';
+import mongoose from 'mongoose';
 
-// Chargement des variables d'environnement selon le contexte
-if (process.env.NODE_ENV === 'production') {
-  dotenv.config(); // Production : utilise .env par défaut
-} else {
-  dotenv.config({ path: path.join(__dirname, '../../.env') }); // Dev : cherche dans le dossier parent
-}
+// Configuration des variables d'environnement
+dotenv.config();
 
 // Création de l'app Express et définition du port
 const app = express();
-const PORT = parseInt(process.env.PORT || '3006', 10);
+const PORT = parseInt(process.env.PORT || '10000', 10);
 
-// Sécurité : protection contre les attaques courantes
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"], // Permet les styles inline pour Tailwind
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"], // Autorise les images externes
-    },
-  },
-  crossOriginEmbedderPolicy: false // Désactivé pour compatibilité
-}));
-
-// Configuration CORS : autorise les requêtes depuis le frontend
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? [process.env.CLIENT_URL || 'https://cardif-y.vercel.app', 'https://cardif-y.vercel.app', 'https://www.cardif-y.vercel.app']
-  : ['http://localhost:3008', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:3010']; // Ports de dev courants
-
+// Configuration CORS simple
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true // Permet l'envoi de cookies et tokens
+  origin: true,
+  credentials: true
 }));
 
-// Protection contre le spam et les attaques
-app.use(generalLimiter);
-
-// Logs des requêtes HTTP
-app.use(morgan('combined'));
-// Parsing des données JSON et formulaires
+// Parsing des données JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Créer le dossier uploads s'il n'existe pas
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Servir les fichiers uploadés (images de cartes)
-app.use('/uploads', express.static(uploadsDir));
-
-// Routes de l'API
+// Route de santé
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Cardify API is running' }); // Check de santé
+  res.json({ status: 'OK', message: 'Cardify API is running' });
 });
 
-// Endpoints principaux
-app.use('/api/users', userRoutes);   // Gestion utilisateurs
-app.use('/api/cards', cardRoutes);   // Gestion cartes
-app.use('/api/upload', uploadRoutes); // Upload de fichiers
-
-// Gestion globale des erreurs
-app.use(errorHandler);
-
-// Route par défaut pour les endpoints inexistants
+// Route par défaut
 app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Connexion DB et démarrage serveur (sauf en mode test)
+// Connexion MongoDB et démarrage serveur
 if (process.env.NODE_ENV !== 'test') {
-  // Connexion à MongoDB
-  connectDB().then(() => {
-    // Démarrage du serveur sur toutes les interfaces
-    app.listen(PORT, '0.0.0.0', () => {
-      logger.info(`🚀 Serveur Cardify API démarré sur le port ${PORT}`);
+  const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
+  
+  mongoose.connect(mongoUri)
+    .then(() => {
+      console.log('✅ MongoDB connected');
+      app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error('❌ MongoDB connection error:', error);
+      process.exit(1);
     });
-  }).catch((error) => {
-    logger.error('❌ Impossible de démarrer le serveur:', { error: String(error) });
-    process.exit(1);
-  });
 }
 
 export default app;
