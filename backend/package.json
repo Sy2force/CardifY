@@ -2,10 +2,10 @@
   "name": "cardify-backend",
   "version": "1.0.0",
   "description": "Cardify backend API",
-  "main": "dist/minimal-server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/minimal-server.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/minimal-server.ts",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "build:full": "tsc"
   },

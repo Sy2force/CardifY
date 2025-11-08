@@ -37,7 +37,7 @@ app.use(helmet({
 // Configuration CORS
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [process.env.CLIENT_URL || 'https://cardify-app-new.vercel.app', 'https://cardify-app-new.vercel.app', 'https://www.cardify-app-new.vercel.app']
-  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3010'];
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3008'];
 
 app.use(cors({
   origin: allowedOrigins,
