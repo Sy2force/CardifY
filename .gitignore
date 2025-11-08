@@ -10,10 +10,11 @@ node_modules/
 .env.production.local
 
 # Build outputs
-dist/
 build/
-*/dist/
 */build/
+# Note: dist/ is not ignored for Render deployment
+# dist/
+# */dist/
 
 # Logs
 logs
