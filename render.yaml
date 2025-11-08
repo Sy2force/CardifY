@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: cardify-backend
+    name: cardify-backend-new
     env: node
     plan: free
     rootDir: ./backend
@@ -12,12 +12,12 @@ services:
       - key: PORT
         value: 10000
       - key: JWT_SECRET
-        generateValue: true
+        value: cardify-super-secret-jwt-key-2024
       - key: CLIENT_URL
-        value: https://cardif-y.vercel.app
+        value: https://cardify-app-new.vercel.app
       - key: CORS_ORIGINS
-        value: https://cardif-y.vercel.app,https://www.cardif-y.vercel.app
+        value: https://cardify-app-new.vercel.app,https://www.cardify-app-new.vercel.app
       - key: SERVER_URL
-        value: https://cardify-backend.onrender.com
+        value: https://cardify-backend-new.onrender.com
       - key: MONGO_URI
         value: mongodb+srv://cardifyuser:bg1skvf3eZmQdLNh@cluster.mongodb.net/cardify
