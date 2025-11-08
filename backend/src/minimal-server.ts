@@ -29,6 +29,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 // Démarrage du serveur
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, '0.0.0.0', () => {
+    // eslint-disable-next-line no-console
     console.log(`🚀 Minimal server running on port ${PORT}`);
   });
 }
