@@ -13,7 +13,12 @@ dotenv.config({ path: path.join(__dirname, '../../../.env') });
 const seedData = async (): Promise<void> => {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/cardify');
+    const mongoUri = process.env.MONGO_URI;
+    if (!mongoUri) {
+      logger.error('MONGO_URI environment variable is required for seeding');
+      process.exit(1);
+    }
+    await mongoose.connect(mongoUri);
     logger.info('Connected to MongoDB for seeding');
 
     // Clear existing data

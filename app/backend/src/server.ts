@@ -79,8 +79,18 @@ const connectWithRetry = async (): Promise<void> => {
   
   if (!mongoUri) {
     logger.error('MONGO_URI environment variable is not set');
+    logger.info('Available environment variables:', { 
+      NODE_ENV: process.env.NODE_ENV,
+      PORT: process.env.PORT,
+      hasJWT: !!process.env.JWT_SECRET,
+      hasMONGO: !!process.env.MONGO_URI
+    });
     process.exit(1);
   }
+
+  // Log sanitized URI for debugging (hide credentials)
+  const sanitizedUri = mongoUri.replace(/\/\/.*@/, '//***@');
+  logger.info(`Attempting MongoDB connection to: ${sanitizedUri}`);
 
   const options = {
     serverSelectionTimeoutMS: 30000,

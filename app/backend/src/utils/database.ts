@@ -12,8 +12,12 @@ export const connectDB = async (): Promise<void> => {
     }
 
     const mongoUri = process.env.NODE_ENV === 'test' 
-      ? process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/cardify_test'
-      : process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
+      ? process.env.MONGO_URI_TEST
+      : process.env.MONGO_URI;
+    
+    if (!mongoUri) {
+      throw new Error(`MONGO_URI${process.env.NODE_ENV === 'test' ? '_TEST' : ''} environment variable is required`);
+    }
     
     await mongoose.connect(mongoUri);
     

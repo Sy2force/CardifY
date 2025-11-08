@@ -132,7 +132,11 @@ const runScript = async (): Promise<void> => {
   
   try {
     // Connect to MongoDB
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
+    const mongoUri = process.env.MONGO_URI;
+    if (!mongoUri) {
+      logger.error('MONGO_URI environment variable is required');
+      process.exit(1);
+    }
     logger.info(`🔌 Connecting to MongoDB: ${mongoUri.replace(/\/\/.*@/, '//***@')}`);
     
     await mongoose.connect(mongoUri);
