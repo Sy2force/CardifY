@@ -32,7 +32,7 @@ const registerSchema = yup.object({
     .required('Password is required'),
   phone: yup
     .string()
-    .matches(/^[\+]?[\d\s\-\.\(\)]+$/, 'Please enter a valid phone number')
+    .matches(/^[+]?[\d\s\-.()]+$/, 'Please enter a valid phone number')
     .min(1)
     .max(25)
     .optional(),

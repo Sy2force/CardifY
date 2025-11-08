@@ -38,7 +38,7 @@ const cardSchema = yup.object({
     .optional(),
   phone: yup
     .string()
-    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number')
+    .matches(/^[+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number')
     .required('Phone is required'),
   email: yup
     .string()
@@ -232,6 +232,10 @@ const Dashboard: React.FC = () => {
     try {
       const response = await cardsAPI.createCard(data);
       if (response) {
+        if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log('Card created successfully:', response);
+      }
         toast.success('Card created successfully!');
         setCards(prev => [response.card!, ...prev]);
         reset();
