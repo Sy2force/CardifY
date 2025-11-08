@@ -4,5 +4,18 @@ services:
     env: node
     plan: free
     rootDir: ./app/backend
-    buildCommand: npm install && npm run build
-    startCommand: node dist/server.js
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        value: cardify-super-secret-jwt-key-2024
+      - key: CLIENT_URL
+        value: https://cardify-app-new.vercel.app
+      - key: CORS_ORIGINS
+        value: https://cardify-app-new.vercel.app,https://www.cardify-app-new.vercel.app
+      - key: MONGO_URI
+        value: mongodb+srv://cardifyuser:bg1skvf3eZmQdLNh@cluster.mongodb.net/cardify
