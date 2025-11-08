@@ -1,7 +1,20 @@
-import { Response } from 'express';
-import { AuthRequest } from '../types/AuthRequest';
+import { Request, Response } from 'express';
 import { FileUploadService } from '../services/fileUpload';
 import { logger } from '../services/logger';
+
+// Extended Request interface with user property
+interface AuthRequest extends Request {
+  user?: {
+    _id: string;
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    isAdmin: boolean;
+    isBusiness: boolean;
+    role: string;
+  };
+}
 
 export const uploadImage = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {

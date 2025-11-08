@@ -1,9 +1,22 @@
-// Middlewares d'authentification - Vérification des tokens et permissions
-import { Response, NextFunction } from 'express';
+// Authentication middlewares - Token verification and permissions
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model';
 import { logger } from '../services/logger';
-import { AuthRequest } from '../types/AuthRequest';
+
+// Extended Request interface with user property
+interface AuthRequest extends Request {
+  user?: {
+    _id: string;
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    isAdmin: boolean;
+    isBusiness: boolean;
+    role: string;
+  };
+}
 
 // Middleware principal : vérification du token JWT
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<Response | void> => {
