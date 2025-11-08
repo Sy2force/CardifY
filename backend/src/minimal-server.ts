@@ -1,15 +1,15 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = parseInt(process.env.PORT || '10000', 10);
 
 // Middleware minimal
 app.use(cors());
 app.use(express.json());
 
 // Route de test simple
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.json({ 
     message: 'Cardify API is running',
     status: 'OK',
@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.json({ 
     status: 'healthy',
     uptime: process.uptime(),
@@ -27,8 +27,10 @@ app.get('/api/health', (req, res) => {
 });
 
 // Démarrage du serveur
-app.listen(PORT, () => {
-  console.log(`🚀 Minimal server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Minimal server running on port ${PORT}`);
+  });
+}
 
 export default app;
