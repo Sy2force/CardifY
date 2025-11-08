@@ -2,14 +2,12 @@
   "name": "cardify-backend",
   "version": "1.0.0",
   "description": "Cardify backend API",
-  "main": "dist/server.js",
+  "main": "dist/simple-server.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
-    "seed": "ts-node src/data/seed.ts",
-    "create-demo-users": "ts-node src/scripts/createDemoUsers.ts",
-    "lint": "eslint src --ext .ts"
+    "start": "node dist/simple-server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/simple-server.ts",
+    "build": "tsc src/simple-server.ts --outDir dist --target ES2020 --module commonjs --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck",
+    "build:full": "tsc"
   },
   "dependencies": {
     "axios": "^1.13.1",
