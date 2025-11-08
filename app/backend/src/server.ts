@@ -1,6 +1,5 @@
 // Serveur principal de l'API Cardify - Point d'entrée de l'application
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
@@ -12,6 +11,7 @@ import userRoutes from './routes/user.routes';
 import cardRoutes from './routes/card.routes';
 import uploadRoutes from './routes/upload.routes';
 import { logger } from './services/logger';
+import { connectDB } from './utils/database';
 
 // Chargement des variables d'environnement selon le contexte
 if (process.env.NODE_ENV === 'production') {
@@ -77,49 +77,17 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Configuration MongoDB
-mongoose.set('strictQuery', false); // Permet les requêtes flexibles
-
 // Connexion DB et démarrage serveur (sauf en mode test)
 if (process.env.NODE_ENV !== 'test') {
-  const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
-  logger.info('Tentative de connexion à MongoDB...');
-  logger.info('URI MongoDB (masquée):', { uri: mongoUri.replace(/\/\/.*@/, '//***:***@') });
-
-  // Fonction de connexion avec retry automatique
-  const connectWithRetry = (): void => {
-    mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 10000, // Timeout sélection serveur
-      socketTimeoutMS: 20000,          // Timeout socket
-      connectTimeoutMS: 10000,         // Timeout connexion
-      maxPoolSize: 5,                  // Pool de connexions max
-      minPoolSize: 1,                  // Pool de connexions min
-      maxIdleTimeMS: 30000,            // Temps d'inactivité max
-      retryWrites: true,               // Retry automatique des écritures
-      authSource: 'admin'              // Source d'authentification
-    }).then(() => {
-      logger.info('✅ MongoDB connecté avec succès');
-    }).catch((error) => {
-      logger.error('❌ Échec connexion MongoDB:', { error: error.message });
-      
-      if (process.env.NODE_ENV === 'production') {
-        // En prod : retry moins agressif (30s)
-        setTimeout(connectWithRetry, 30000);
-        return;
-      }
-      
-      // En dev : retry rapide (10s)
-      logger.info('Nouvelle tentative dans 10 secondes...');
-      setTimeout(connectWithRetry, 10000);
+  // Connexion à MongoDB
+  connectDB().then(() => {
+    // Démarrage du serveur sur toutes les interfaces
+    app.listen(PORT, '0.0.0.0', () => {
+      logger.info(`🚀 Serveur Cardify API démarré sur le port ${PORT}`);
     });
-  };
-
-  // Lancement de la connexion
-  connectWithRetry();
-
-  // Démarrage du serveur sur toutes les interfaces
-  app.listen(PORT, '0.0.0.0', () => {
-    logger.info(`🚀 Serveur Cardify API démarré sur le port ${PORT}`);
+  }).catch((error) => {
+    logger.error('❌ Impossible de démarrer le serveur:', { error: String(error) });
+    process.exit(1);
   });
 }
 
