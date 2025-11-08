@@ -1,8 +1,21 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import Card from '../models/card.model';
-import { AuthRequest } from '../types/AuthRequest';
 import { createCardSchema, updateCardSchema } from '../validations/card.validation';
 import { logger } from '../services/logger';
+
+// Extended Request interface with user property
+interface AuthRequest extends Request {
+  user?: {
+    _id: string;
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    isAdmin: boolean;
+    isBusiness: boolean;
+    role: string;
+  };
+}
 
 export const createCard = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {

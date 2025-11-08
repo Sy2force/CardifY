@@ -1,11 +1,24 @@
-// Contrôleur utilisateurs - Gestion auth et profils
-import { Response } from 'express';
+// User controller - Authentication and profile management
+import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model';
-import { AuthRequest } from '../types/AuthRequest';
 import { registerSchema, loginSchema, updateUserSchema } from '../validations/user.validation';
 import { logger } from '../services/logger';
+
+// Extended Request interface with user property
+interface AuthRequest extends Request {
+  user?: {
+    _id: string;
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    isAdmin: boolean;
+    isBusiness: boolean;
+    role: string;
+  };
+}
 // import { sendEmail } from '../services/email'; // Service email (futur)
 
 // Interface pour les données du token JWT
