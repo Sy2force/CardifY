@@ -12,6 +12,7 @@ import { generalLimiter } from './middlewares/rateLimit';
 import userRoutes from './routes/user.routes';
 import cardRoutes from './routes/card.routes';
 import uploadRoutes from './routes/upload.routes';
+import { logger } from './services/logger';
 
 // Configuration des variables d'environnement
 dotenv.config();
@@ -72,24 +73,48 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Connexion MongoDB et démarrage serveur
-if (process.env.NODE_ENV !== 'test') {
-  const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/cardify';
+// Fonction de connexion MongoDB avec retry
+const connectWithRetry = async (): Promise<void> => {
+  const mongoUri = process.env.MONGO_URI;
   
-  mongoose.connect(mongoUri)
-    .then(() => {
-      // eslint-disable-next-line no-console
-      console.log('✅ MongoDB connected');
-      app.listen(PORT, '0.0.0.0', () => {
-        // eslint-disable-next-line no-console
-        console.log(`🚀 Server running on port ${PORT}`);
-      });
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('❌ MongoDB connection error:', error);
+  if (!mongoUri) {
+    logger.error('MONGO_URI environment variable is not set');
+    process.exit(1);
+  }
+
+  const options = {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
+    maxPoolSize: 10,
+    retryWrites: true,
+    authSource: 'admin'
+  };
+
+  try {
+    await mongoose.connect(mongoUri, options);
+    logger.info('✅ MongoDB connected successfully');
+  } catch (error) {
+    logger.error('❌ MongoDB connection failed:', { error: error instanceof Error ? error.message : String(error) });
+    
+    if (process.env.NODE_ENV === 'production') {
+      logger.info('Retrying MongoDB connection in 5 seconds...');
+      setTimeout(connectWithRetry, 5000);
+    } else {
       process.exit(1);
-    });
+    }
+  }
+};
+
+// Démarrage serveur
+if (process.env.NODE_ENV !== 'test') {
+  // Démarrer le serveur indépendamment de MongoDB
+  app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`🚀 Server running on port ${PORT}`);
+  });
+  
+  // Connecter à MongoDB
+  connectWithRetry();
 }
 
 export default app;
