@@ -7,6 +7,11 @@ services:
     startCommand: npm start
     plan: free
     healthCheckPath: /api/health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/**
+        - render.yaml
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,5 +21,17 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
       - key: CLIENT_URL
         value: https://cardify-app-new.vercel.app
+      - key: CORS_ORIGINS
+        value: https://cardify-app-new.vercel.app,https://www.cardify-app-new.vercel.app
+      - key: LOG_LEVEL
+        value: info
+      - key: RATE_LIMIT_MAX
+        value: 100
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: BODY_LIMIT
+        value: 10mb
