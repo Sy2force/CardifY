@@ -129,6 +129,7 @@ const Dashboard: React.FC = () => {
         await fetchMyCards();
       }
     } catch (error: any) {
+      // eslint-disable-next-line no-console
       console.error('Error updating card:', error);
       let errorMessage;
       if (error.name === 'NetworkError') {
@@ -233,8 +234,7 @@ const Dashboard: React.FC = () => {
       const response = await cardsAPI.createCard(data);
       if (response) {
         if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.log('Card created successfully:', response);
+        // Development only - card creation success
       }
         toast.success('Card created successfully!');
         setCards(prev => [response.card!, ...prev]);

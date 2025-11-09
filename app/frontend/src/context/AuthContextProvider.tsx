@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               localStorage.setItem('cardify_user', JSON.stringify(response.user));
             }
           } catch (parseError) {
+            // eslint-disable-next-line no-console
             console.error('Error parsing saved user:', parseError);
             // Clear invalid data
             localStorage.removeItem('cardify_token');
@@ -41,6 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Auth initialization error:', error);
         // Clear auth data on any error
         localStorage.removeItem('cardify_token');

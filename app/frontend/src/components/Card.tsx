@@ -43,6 +43,7 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
     e.stopPropagation();
     
     if (!onDelete) {
+      // eslint-disable-next-line no-console
       console.error('onDelete function is not provided');
       return;
     }
@@ -54,6 +55,7 @@ const Card: React.FC<CardProps> = ({ card, onLike, onEdit, onDelete, isLoading =
     try {
       await onDelete(card._id);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error in handleDelete:', error);
     }
   };

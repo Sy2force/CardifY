@@ -317,7 +317,10 @@ const CardDetails: React.FC = () => {
                         title: card.title,
                         text: card.description,
                         url: window.location.href,
-                      }).catch(console.error);
+                      }).catch((error) => {
+                        // eslint-disable-next-line no-console
+                        console.error('Share failed:', error);
+                      });
                     } else {
                       navigator.clipboard.writeText(window.location.href);
                       toast.success(t('common.link_copied'));
@@ -335,8 +338,7 @@ const CardDetails: React.FC = () => {
                     <Button
                       onClick={() => {
                         if (import.meta.env.DEV) {
-                          // eslint-disable-next-line no-console
-                          console.log('Share card:', card._id);
+                          // Development only - card sharing
                         }
                       }}
                       variant="ghost"

@@ -55,6 +55,7 @@ const Admin: React.FC = () => {
         regularUsers
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error fetching admin stats:', error);
       toast.error('Erreur lors du chargement des statistiques');
     } finally {
