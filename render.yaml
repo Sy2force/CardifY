@@ -1,17 +1,20 @@
 services:
   - type: web
-    name: cardify-backend
+    name: cardify-backend-production
     env: node
     rootDir: ./backend
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci && npm run build && npm run postbuild:cleanup
     startCommand: npm start
     plan: free
+    region: oregon
+    branch: main
     healthCheckPath: /api/health
     autoDeploy: true
     buildFilter:
       paths:
         - backend/**
         - render.yaml
+        - package*.json
     envVars:
       - key: NODE_ENV
         value: production
@@ -24,9 +27,9 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: CLIENT_URL
-        value: https://cardify-app-new.vercel.app
+        sync: false
       - key: CORS_ORIGINS
-        value: https://cardify-app-new.vercel.app,https://www.cardify-app-new.vercel.app
+        sync: false
       - key: LOG_LEVEL
         value: info
       - key: RATE_LIMIT_MAX
@@ -35,3 +38,9 @@ services:
         value: 900000
       - key: BODY_LIMIT
         value: 10mb
+      - key: BCRYPT_SALT_ROUNDS
+        value: 12
+      - key: MONGODB_TIMEOUT_MS
+        value: 30000
+      - key: JWT_ALGORITHM
+        value: HS256

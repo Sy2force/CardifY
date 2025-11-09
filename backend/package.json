@@ -9,14 +9,17 @@
   },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --files src/index.ts",
-    "build": "npm run clean && tsc --build",
+    "build": "npm run clean && tsc --build --verbose",
     "start": "node dist/index.js",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
+    "postbuild:cleanup": "find dist -name '*.js.map' -delete",
     "type-check": "tsc --noEmit --pretty",
     "health": "curl http://localhost:8080/api/health || echo 'Server not running'",
     "lint": "tsc --noEmit",
-    "postinstall": "npm run build"
+    "test:build": "npm run build && node dist/index.js --check",
+    "render:build": "npm ci && npm run build",
+    "render:start": "NODE_ENV=production node dist/index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
