@@ -5,11 +5,14 @@ Backend Express API with TypeScript for the Cardify business card application.
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 20+ 
+
+- Node.js 20+
 - MongoDB (local or MongoDB Atlas)
 
 ### Environment Variables
+
 Create `.env` file in backend directory:
+
 ```env
 NODE_ENV=development
 PORT=10000
@@ -43,7 +46,7 @@ npm run lint:fix
 
 ## 📁 Project Structure
 
-```
+```text
 backend/
 ├── src/
 │   ├── index.ts          # Entry point
@@ -64,6 +67,7 @@ backend/
 ## 🔍 Testing
 
 ### Health Check
+
 ```bash
 # Test local server
 curl http://localhost:10000/health
@@ -79,6 +83,7 @@ curl http://localhost:10000/health
 ```
 
 ### API Routes
+
 ```bash
 # Health check (alternative)
 curl http://localhost:10000/api/health
@@ -88,6 +93,7 @@ curl http://localhost:10000/
 ```
 
 ### Build Verification
+
 ```bash
 # Clean build
 npm run clean
@@ -120,6 +126,7 @@ node dist/index.js
 The backend is configured for automatic deployment on Render.com:
 
 ### render.yaml Configuration
+
 ```yaml
 services:
   - type: web
@@ -131,6 +138,7 @@ services:
 ```
 
 ### Required Environment Variables on Render
+
 - `NODE_ENV=production`
 - `PORT=10000`
 - `MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/cardify`
@@ -138,6 +146,7 @@ services:
 - `CLIENT_URL=https://your-frontend-domain.vercel.app`
 
 ### Deployment Process
+
 1. Push code to main branch
 2. Render automatically detects changes
 3. Runs `npm ci && npm run build`
@@ -149,6 +158,7 @@ services:
 ### Common Issues
 
 **Error: `Cannot find module './dist/index.js'`**
+
 ```bash
 # Solution: Ensure build completed successfully
 npm run build
@@ -156,12 +166,14 @@ ls -la dist/  # Should show index.js
 ```
 
 **Error: `EADDRINUSE: address already in use`**
+
 ```bash
 # Solution: Use different port
 PORT=3009 npm start
 ```
 
 **Error: `Missing MONGO_URI environment variable`**
+
 ```bash
 # Solution: Set environment variable
 export MONGO_URI=mongodb://localhost:27017/cardify-dev
@@ -169,6 +181,7 @@ export MONGO_URI=mongodb://localhost:27017/cardify-dev
 ```
 
 **MongoDB Connection Failed**
+
 ```bash
 # Local MongoDB
 brew services start mongodb-community
@@ -176,6 +189,7 @@ brew services start mongodb-community
 ```
 
 ### Build Debugging
+
 ```bash
 # Verbose TypeScript compilation
 npx tsc --noEmit --listFiles
@@ -188,6 +202,7 @@ npm ls
 ```
 
 ### Production Logs
+
 ```bash
 # Check server logs
 npm start 2>&1 | tee server.log
@@ -201,15 +216,18 @@ pm2 logs cardify-api
 ## 🏗️ Development
 
 ### Adding New Routes
+
 1. Create controller in `src/controllers/`
 2. Add route in `src/routes/`
 3. Import and use in `src/index.ts`
 
 ### Database Models
+
 - Use Mongoose schemas in `src/models/`
 - Add validation with Joi in `src/validations/`
 
 ### TypeScript Strict Mode
+
 - All unused variables/parameters flagged
 - Null safety enforced
 - Type checking strict
