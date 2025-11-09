@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://cardify-backend-complete.onrender.com/api/$1"
+      "destination": "https://cardify-backend.onrender.com/api/$1"
     }
   ]
 }

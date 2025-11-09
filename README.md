@@ -14,52 +14,91 @@ app/
 │   │   ├── hooks/         # Custom hooks
 │   │   ├── services/      # API services
 │   │   ├── types/         # TypeScript types
-│   │   └── locales/       # i18n translations
-│   └── package.json
-├── backend/           # Node.js + Express API
-│   ├── src/
-│   │   ├── controllers/   # Route controllers
-│   │   ├── models/        # MongoDB models
-│   │   ├── middlewares/   # Express middlewares
-│   │   ├── routes/        # API routes
-│   │   ├── services/      # Business logic
-│   │   ├── validations/   # Input validation
-│   │   └── utils/         # Utilities
-│   └── package.json
-└── docs/              # Documentation
-    ├── DEPLOYMENT.md      # Deployment guide
-    ├── CONTRIBUTING.md    # Contributing guide
-    └── LICENSE           # License file
 ```
 
-## 🚀 Quick Start
+## Configuration de Déploiement
 
-### Frontend
+### Backend (Render)
+
+**Scripts:**
+- `npm run build` → Compile TypeScript vers `dist/index.js`
+- `npm start` → Lance `node dist/index.js`
+
+**Endpoints:**
+- `/health` → Health check simple
+- `/api/health` → Health check détaillé avec timestamp
+
+**Variables d'environnement:**
+- `NODE_ENV=production`
+- `PORT=8080`
+- `MONGO_URI=mongodb+srv://...`
+- `JWT_SECRET=...`
+- `CLIENT_URL=https://your-frontend.vercel.app`
+
+### Frontend (Vercel)
+
+**Build:** `cd app/frontend && npm run build`
+**Output:** `app/frontend/dist`
+
+**Variables d'environnement:**
+- `VITE_API_URL=https://your-backend.onrender.com`
+
+**Proxy API:** `/api/*` → Backend Render
+
+## Développement Local
+
 ```bash
+# Backend
+cd backend
+npm install
+npm run dev        # Port 8080
+
+# Frontend  
 cd app/frontend
 npm install
-npm run dev
+npm run dev        # Port 5173
 ```
 
-### Backend
+## Tests
+
 ```bash
-cd app/backend
-npm install
-npm run dev
+# Backend
+cd backend
+npm run build
+npm start
+curl http://localhost:8080/health
+
+# Frontend
+cd app/frontend
+npm run build
+npm run preview
 ```
 
-## 🔧 Tech Stack
+## Fonctionnalités
 
-**Frontend:** React, TypeScript, Vite, Tailwind CSS
-**Backend:** Node.js, Express, MongoDB, TypeScript
-**Deployment:** Vercel (Frontend) + Render (Backend)
+- Authentification JWT
+- CRUD cartes de visite
+- Interface responsive
+- Internationalisation (FR/EN)
+- Upload d'images
+- Health checks
 
-## 📖 Documentation
+## Tech Stack
+
+**Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Framer Motion
+**Backend:** Node.js, Express, TypeScript, MongoDB, JWT
+**Deploy:** Vercel + Render
+
+## Déploiement
+
+- **Backend:** Auto-deploy depuis `main` → Render
+- **Frontend:** Auto-deploy depuis `main` → Vercel
+- **URL API:** Configurée via `/api/*` proxytation
 
 - [Deployment Guide](app/docs/DEPLOYMENT.md)
 - [Contributing Guide](app/docs/CONTRIBUTING.md)
 
-## 🧪 Test Accounts
+## Test Accounts
 
 ```
 Admin:    admin@cardify.com / admin123

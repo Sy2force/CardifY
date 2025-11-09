@@ -3,7 +3,7 @@ import axios from 'axios';
 import { AuthResponse, ApiResponse, LoginFormData, RegisterFormData, CardFormData } from '../types';
 
 // URL de base de l'API (env ou localhost par défaut)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3006/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 // Instance Axios configurée
 const api = axios.create({
