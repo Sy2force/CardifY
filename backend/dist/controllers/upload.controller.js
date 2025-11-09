@@ -10,8 +10,10 @@ const uploadImage = async (req, res) => {
                 message: 'No file uploaded'
             });
         }
+        // Validate the uploaded file
         const validation = fileUpload_1.FileUploadService.validateImageFile(req.file);
         if (!validation.valid) {
+            // Delete the uploaded file if validation fails
             fileUpload_1.FileUploadService.deleteFile(req.file.filename);
             return res.status(400).json({
                 message: validation.error

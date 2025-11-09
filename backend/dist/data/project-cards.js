@@ -9,6 +9,7 @@ const user_model_1 = __importDefault(require("../models/user.model"));
 const logger_1 = require("../services/logger");
 const createProjectCards = async () => {
     try {
+        // Trouver un utilisateur business existant ou créer un utilisateur pour les projets
         let projectUser = await user_model_1.default.findOne({ email: 'projects@cardify.com' });
         if (!projectUser) {
             projectUser = new user_model_1.default({
@@ -133,7 +134,9 @@ const createProjectCards = async () => {
                 likes: []
             }
         ];
+        // Supprimer les anciennes cartes de projets si elles existent
         await card_model_1.default.deleteMany({ user_id: projectUser._id });
+        // Créer les nouvelles cartes une par une pour éviter les conflits bizNumber
         const createdCards = [];
         for (const cardData of projectCards) {
             const card = new card_model_1.default(cardData);

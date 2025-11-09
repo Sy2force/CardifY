@@ -11,9 +11,11 @@ const user_model_1 = __importDefault(require("../models/user.model"));
 const card_model_1 = __importDefault(require("../models/card.model"));
 const logger_1 = require("../services/logger");
 const project_cards_1 = require("./project-cards");
+// Load environment variables
 dotenv_1.default.config({ path: path_1.default.join(__dirname, '../../../.env') });
 const seedData = async () => {
     try {
+        // Connect to MongoDB
         const mongoUri = process.env.MONGO_URI;
         if (!mongoUri) {
             logger_1.logger.error('MONGO_URI environment variable is required for seeding');
@@ -21,9 +23,11 @@ const seedData = async () => {
         }
         await mongoose_1.default.connect(mongoUri);
         logger_1.logger.info('Connected to MongoDB for seeding');
+        // Clear existing data
         await user_model_1.default.deleteMany({});
         await card_model_1.default.deleteMany({});
         logger_1.logger.info('Cleared existing data');
+        // Create demo users with properly hashed passwords
         const users = [
             {
                 firstName: 'Admin',
@@ -53,6 +57,7 @@ const seedData = async () => {
         ];
         const createdUsers = await user_model_1.default.insertMany(users);
         logger_1.logger.info(`Created ${createdUsers.length} demo users`);
+        // Create demo cards for business users
         const businessUsers = createdUsers.filter((user) => user.isBusiness);
         const cards = [
             {
@@ -182,6 +187,7 @@ const seedData = async () => {
                 likes: []
             }
         ];
+        // Create cards one by one to trigger pre-save hooks for bizNumber generation
         const createdCards = [];
         for (const cardData of cards) {
             const card = new card_model_1.default(cardData);
@@ -189,6 +195,7 @@ const seedData = async () => {
             createdCards.push(card);
         }
         logger_1.logger.info(`Created ${createdCards.length} demo cards`);
+        // Create project cards
         const projectCards = await (0, project_cards_1.createProjectCards)();
         logger_1.logger.info(`Created ${projectCards.length} project cards`);
         logger_1.logger.info('Database seeded successfully!');

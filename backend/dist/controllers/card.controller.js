@@ -9,6 +9,7 @@ const card_validation_1 = require("../validations/card.validation");
 const logger_1 = require("../services/logger");
 const createCard = async (req, res) => {
     try {
+        // Check if user is business user
         if (!req.user?.isBusiness) {
             return res.status(403).json({
                 message: 'Business account required to create cards'
@@ -203,9 +204,11 @@ const likeCard = async (req, res) => {
         }
         const isLiked = card.likes.some((id) => id.toString() === userId);
         if (isLiked) {
+            // Unlike the card
             card.likes = card.likes.filter(id => id.toString() !== userId);
         }
         else {
+            // Like the card
             card.likes.push(userId);
         }
         await card.save();

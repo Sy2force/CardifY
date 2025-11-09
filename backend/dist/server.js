@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// Serveur principal de l'API Cardify - Point d'entrée de l'application
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -17,8 +18,11 @@ const user_routes_1 = __importDefault(require("./routes/user.routes"));
 const card_routes_1 = __importDefault(require("./routes/card.routes"));
 const upload_routes_1 = __importDefault(require("./routes/upload.routes"));
 const logger_1 = require("./services/logger");
+// Configuration des variables d'environnement
 dotenv_1.default.config();
+// Création de l'app Express
 const app = (0, express_1.default)();
+// Sécurité
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: {
         directives: {
@@ -30,6 +34,7 @@ app.use((0, helmet_1.default)({
     },
     crossOriginEmbedderPolicy: false
 }));
+// Configuration CORS
 const allowedOrigins = process.env.NODE_ENV === 'production'
     ? [process.env.CLIENT_URL || 'https://cardify-app-new.vercel.app', 'https://cardify-app-new.vercel.app', 'https://www.cardify-app-new.vercel.app']
     : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3008'];
@@ -37,15 +42,18 @@ app.use((0, cors_1.default)({
     origin: allowedOrigins,
     credentials: true
 }));
+// Middlewares
 app.use(rateLimit_1.generalLimiter);
 app.use((0, morgan_1.default)('combined'));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
+// Créer le dossier uploads
 const uploadsDir = path_1.default.join(__dirname, '../uploads');
 if (!fs_1.default.existsSync(uploadsDir)) {
     fs_1.default.mkdirSync(uploadsDir, { recursive: true });
 }
 app.use('/uploads', express_1.default.static(uploadsDir));
+// Routes
 app.get('/api/health', (_req, res) => {
     res.json({
         status: 'OK',
@@ -57,10 +65,12 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/users', user_routes_1.default);
 app.use('/api/cards', card_routes_1.default);
 app.use('/api/upload', upload_routes_1.default);
+// Gestion des erreurs
 app.use(error_1.errorHandler);
 app.use('*', (_req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
+// Fonction de connexion MongoDB avec retry
 const connectWithRetry = async () => {
     const mongoUri = process.env.MONGO_URI;
     if (!mongoUri) {
@@ -73,6 +83,7 @@ const connectWithRetry = async () => {
         });
         process.exit(1);
     }
+    // Log sanitized URI for debugging (hide credentials)
     const sanitizedUri = mongoUri.replace(/\/\/.*@/, '//***@');
     logger_1.logger.info(`Attempting MongoDB connection to: ${sanitizedUri}`);
     const options = {
@@ -98,6 +109,7 @@ const connectWithRetry = async () => {
         }
     }
 };
+// Connexion MongoDB au démarrage du module
 if (process.env.NODE_ENV !== 'test') {
     connectWithRetry();
 }

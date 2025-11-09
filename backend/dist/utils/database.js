@@ -8,6 +8,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const logger_1 = require("../services/logger");
 const connectDB = async () => {
     try {
+        // Check if already connected to avoid multiple connections
         if (mongoose_1.default.connection.readyState === 1) {
             if (process.env.NODE_ENV !== 'test') {
                 logger_1.logger.info('✅ MongoDB already connected');
@@ -27,11 +28,12 @@ const connectDB = async () => {
     }
     catch (error) {
         logger_1.logger.error('❌ MongoDB connection error', { error: String(error) });
+        // Don't exit process in test environment to avoid crashing Jest
         if (process.env.NODE_ENV !== 'test') {
             process.exit(1);
         }
         else {
-            throw error;
+            throw error; // Re-throw error in test environment
         }
     }
 };

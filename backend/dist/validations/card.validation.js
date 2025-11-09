@@ -4,8 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateCardValidation = exports.createCardValidation = exports.updateCardSchema = exports.createCardSchema = void 0;
+// Card validations - Joi schemas for business card data
 const joi_1 = __importDefault(require("joi"));
 const validation_1 = require("../middlewares/validation");
+// Validation schema for card creation
 exports.createCardSchema = joi_1.default.object({
     title: joi_1.default.string().min(2).max(100).required().messages({
         'string.min': 'Title must be at least 2 characters',
@@ -38,7 +40,7 @@ exports.createCardSchema = joi_1.default.object({
         alt: joi_1.default.string().max(100).messages({
             'string.max': 'Alt text must not exceed 100 characters'
         })
-    }).optional(),
+    }).optional(), // Optional image with URL and alt text
     address: joi_1.default.object({
         state: joi_1.default.string().max(50).allow('').optional().messages({
             'string.max': 'State must not exceed 50 characters'
@@ -62,8 +64,9 @@ exports.createCardSchema = joi_1.default.object({
         zip: joi_1.default.string().max(10).allow('').optional().messages({
             'string.max': 'ZIP code must not exceed 10 characters'
         })
-    }).allow(null).optional()
+    }).allow(null).optional() // Complete address is optional
 });
+// Validation schema for card updates
 exports.updateCardSchema = joi_1.default.object({
     title: joi_1.default.string().min(2).max(100).messages({
         'string.min': 'Title must be at least 2 characters',
@@ -118,5 +121,6 @@ exports.updateCardSchema = joi_1.default.object({
         })
     })
 });
-exports.createCardValidation = (0, validation_1.validate)(exports.createCardSchema);
-exports.updateCardValidation = (0, validation_1.validate)(exports.updateCardSchema);
+// Export validation functions for middleware use
+exports.createCardValidation = (0, validation_1.validate)(exports.createCardSchema); // Card creation validation
+exports.updateCardValidation = (0, validation_1.validate)(exports.updateCardSchema); // Card update validation
