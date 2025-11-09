@@ -7,21 +7,17 @@ exports.businessMiddleware = exports.adminMiddleware = exports.authMiddleware = 
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_model_1 = __importDefault(require("../models/user.model"));
 const logger_1 = require("../services/logger");
-// Middleware principal : vérification du token JWT
 const authMiddleware = async (req, res, next) => {
     try {
-        // Extraction du token depuis l'en-tête Authorization
         const token = req.header('Authorization')?.replace('Bearer ', '');
         if (!token) {
             return res.status(401).json({ message: 'Accès refusé. Token manquant.' });
         }
-        // Vérification et décodage du JWT
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
         const user = await user_model_1.default.findById(decoded._id);
         if (!user) {
             return res.status(401).json({ message: 'Token invalide.' });
         }
-        // Injection des données utilisateur dans la requête
         req.user = {
             _id: user._id.toString(),
             id: user._id.toString(),
@@ -32,7 +28,7 @@ const authMiddleware = async (req, res, next) => {
             isBusiness: user.isBusiness,
             role: user.isAdmin ? 'admin' : user.isBusiness ? 'business' : 'user'
         };
-        next(); // Passe au middleware suivant
+        next();
     }
     catch (error) {
         logger_1.logger.error('Erreur middleware auth:', { error: String(error) });
@@ -40,19 +36,17 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 exports.authMiddleware = authMiddleware;
-// Middleware admin : vérifie les droits administrateur
 const adminMiddleware = (req, res, next) => {
     if (!req.user?.isAdmin) {
         return res.status(403).json({ message: 'Accès refusé. Droits admin requis.' });
     }
-    next(); // Utilisateur admin confirmé
+    next();
 };
 exports.adminMiddleware = adminMiddleware;
-// Middleware business : vérifie le compte professionnel
 const businessMiddleware = (req, res, next) => {
     if (!req.user?.isBusiness && !req.user?.isAdmin) {
         return res.status(403).json({ message: 'Accès refusé. Compte business requis.' });
     }
-    next(); // Compte business ou admin confirmé
+    next();
 };
 exports.businessMiddleware = businessMiddleware;

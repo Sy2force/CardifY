@@ -4,33 +4,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.emailService = void 0;
-// Email service - Email sending management with Nodemailer
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const logger_1 = require("./logger");
-// Centralized email service
 class EmailService {
     constructor() {
-        // SMTP transporter configuration
         this.transporter = nodemailer_1.default.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.SMTP_PORT || '587'),
-            secure: false, // true for 465, false for other ports
+            secure: false,
             auth: {
-                user: process.env.SMTP_USER, // SMTP email
-                pass: process.env.SMTP_PASS, // SMTP password
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
             },
         });
     }
-    // Generic method to send an email
     async sendEmail(options) {
         try {
-            // Check SMTP credentials
             if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
                 logger_1.logger.warn('SMTP credentials not configured, email not sent');
                 return false;
             }
             const mailOptions = {
-                from: `"Cardify" <${process.env.SMTP_USER}>`, // Sender
+                from: `"Cardify" <${process.env.SMTP_USER}>`,
                 to: options.to,
                 subject: options.subject,
                 text: options.text,
@@ -45,7 +40,6 @@ class EmailService {
             return false;
         }
     }
-    // Welcome email for new users
     async sendWelcomeEmail(email, firstName) {
         const subject = 'Welcome to Cardify!';
         const html = `
@@ -63,7 +57,6 @@ class EmailService {
     `;
         return this.sendEmail({ to: email, subject, html });
     }
-    // Password reset email
     async sendPasswordResetEmail(email, resetToken) {
         const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
         const subject = 'Password Reset Request';
@@ -81,5 +74,4 @@ class EmailService {
         return this.sendEmail({ to: email, subject, html });
     }
 }
-// Unique instance of the email service
 exports.emailService = new EmailService();

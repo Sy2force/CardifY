@@ -17,9 +17,8 @@ import { logger } from './services/logger';
 // Configuration des variables d'environnement
 dotenv.config();
 
-// Création de l'app Express et définition du port
+// Création de l'app Express
 const app = express();
-const PORT = parseInt(process.env.PORT || '10000', 10);
 
 // Sécurité
 app.use(helmet({
@@ -58,8 +57,13 @@ if (!fs.existsSync(uploadsDir)) {
 app.use('/uploads', express.static(uploadsDir));
 
 // Routes
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Cardify API is running' });
+app.get('/api/health', (_req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Cardify API is running',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development'
+  });
 });
 
 app.use('/api/users', userRoutes);
@@ -69,7 +73,7 @@ app.use('/api/upload', uploadRoutes);
 // Gestion des erreurs
 app.use(errorHandler);
 
-app.use('*', (req, res) => {
+app.use('*', (_req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
@@ -116,14 +120,8 @@ const connectWithRetry = async (): Promise<void> => {
   }
 };
 
-// Démarrage serveur
+// Connexion MongoDB au démarrage du module
 if (process.env.NODE_ENV !== 'test') {
-  // Démarrer le serveur indépendamment de MongoDB
-  app.listen(PORT, '0.0.0.0', () => {
-    logger.info(`🚀 Server running on port ${PORT}`);
-  });
-  
-  // Connecter à MongoDB
   connectWithRetry();
 }
 

@@ -80,7 +80,7 @@ const seedData = async (): Promise<void> => {
           houseNumber: '123',
           zip: '10001'
         },
-        user_id: businessUsers[1]._id,
+        user_id: businessUsers[1]?._id,
         likes: []
       },
       {
@@ -101,7 +101,7 @@ const seedData = async (): Promise<void> => {
           houseNumber: '45',
           zip: '75001'
         },
-        user_id: businessUsers[0]._id,
+        user_id: businessUsers[0]?._id,
         likes: []
       },
       {
@@ -122,7 +122,7 @@ const seedData = async (): Promise<void> => {
           houseNumber: '78',
           zip: '00186'
         },
-        user_id: businessUsers[1]._id,
+        user_id: businessUsers[1]?._id,
         likes: []
       },
       {
@@ -143,7 +143,7 @@ const seedData = async (): Promise<void> => {
           houseNumber: '221',
           zip: 'NW1 6XE'
         },
-        user_id: businessUsers[0]._id,
+        user_id: businessUsers[0]?._id,
         likes: []
       },
       {
@@ -164,7 +164,7 @@ const seedData = async (): Promise<void> => {
           houseNumber: '12',
           zip: '28013'
         },
-        user_id: businessUsers[1]._id,
+        user_id: businessUsers[1]?._id,
         likes: []
       },
       {
@@ -185,7 +185,7 @@ const seedData = async (): Promise<void> => {
           houseNumber: '456',
           zip: 'M5V 2A9'
         },
-        user_id: businessUsers[0]._id,
+        user_id: businessUsers[0]?._id,
         likes: []
       }
     ];

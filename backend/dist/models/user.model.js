@@ -36,18 +36,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// Modèle utilisateur - Structure et validation des comptes
 const mongoose_1 = __importStar(require("mongoose"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const logger_1 = require("../services/logger");
-// Schéma MongoDB avec validations
 const UserSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
         required: [true, 'Le prénom est requis'],
-        minlength: 2, // Min 2 caractères
-        maxlength: 50, // Max 50 caractères
-        trim: true // Supprime espaces début/fin
+        minlength: 2,
+        maxlength: 50,
+        trim: true
     },
     lastName: {
         type: String,
@@ -59,51 +57,47 @@ const UserSchema = new mongoose_1.Schema({
     email: {
         type: String,
         required: [true, 'L\'email est requis'],
-        unique: true, // Index unique en DB
-        lowercase: true, // Conversion auto en minuscules
+        unique: true,
+        lowercase: true,
         match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Format email invalide']
     },
     password: {
         type: String,
         required: [true, 'Le mot de passe est requis'],
-        minlength: 6 // Minimum 6 caractères
+        minlength: 6
     },
     phone: {
         type: String,
-        match: [/^[+]?[1-9][\d]{0,15}$/, 'Format téléphone invalide'] // Format international
+        match: [/^[+]?[1-9][\d]{0,15}$/, 'Format téléphone invalide']
     },
     isAdmin: {
         type: Boolean,
-        default: false // Utilisateur normal par défaut
+        default: false
     },
     isBusiness: {
         type: Boolean,
-        default: false // Compte personnel par défaut
+        default: false
     }
 }, {
-    timestamps: true // Ajoute createdAt et updatedAt automatiquement
+    timestamps: true
 });
-// Middleware : hash du mot de passe avant sauvegarde
 UserSchema.pre('save', async function (next) {
-    // Skip si le mot de passe n'a pas changé
     if (!this.isModified('password'))
         return next();
     try {
-        const salt = await bcryptjs_1.default.genSalt(10); // Génération du sel
-        this.password = await bcryptjs_1.default.hash(this.password, salt); // Hash avec bcrypt
+        const salt = await bcryptjs_1.default.genSalt(10);
+        this.password = await bcryptjs_1.default.hash(this.password, salt);
         next();
     }
     catch (error) {
         next(error);
     }
 });
-// Méthode : comparaison sécurisée des mots de passe
 UserSchema.methods.comparePassword = async function (password) {
     try {
         if (!this.password) {
             throw new Error('Aucun mot de passe trouvé pour cet utilisateur');
         }
-        // Comparaison avec bcrypt (résistant aux attaques timing)
         return await bcryptjs_1.default.compare(password, this.password);
     }
     catch (error) {
@@ -111,11 +105,9 @@ UserSchema.methods.comparePassword = async function (password) {
         throw error;
     }
 };
-// Méthode : supprime le mot de passe des réponses JSON
 UserSchema.methods.toJSON = function () {
     const userObject = this.toObject();
-    delete userObject.password; // Sécurité : jamais exposer le hash
+    delete userObject.password;
     return userObject;
 };
-// Export du modèle Mongoose
 exports.default = mongoose_1.default.model('User', UserSchema);

@@ -48,7 +48,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<Respons
     const { error } = registerSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ 
-        message: error.details[0].message 
+        message: error.details?.[0]?.message || 'Validation error' 
       });
     }
 
@@ -99,7 +99,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<Response |
     const { error } = loginSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ 
-        message: error.details[0].message 
+        message: error.details?.[0]?.message || 'Validation error' 
       });
     }
 
@@ -188,7 +188,7 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<Re
     const { error } = updateUserSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ 
-        message: error.details[0].message 
+        message: error.details?.[0]?.message || 'Validation error' 
       });
     }
 

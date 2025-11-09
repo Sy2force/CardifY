@@ -1,11 +1,11 @@
 services:
   - type: web
-    name: cardify-backend-complete
+    name: cardify-backend
     env: node
     plan: free
     rootDir: ./backend
-    buildCommand: npm install && npm run build
-    startCommand: node dist/server.js
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production

@@ -13,10 +13,10 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Multer storage configuration for uploads
 const storage = multer.diskStorage({
-  destination: (req: Request, file: Express.Multer.File, cb) => {
+  destination: (_req: Request, _file: Express.Multer.File, cb) => {
     cb(null, uploadsDir); // Destination directory
   },
-  filename: (req: Request, file: Express.Multer.File, cb) => {
+  filename: (_req: Request, file: Express.Multer.File, cb) => {
     // Generate unique filename
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
 });
 
 // Filter to accept only images
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback): void => {
+const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback): void => {
   const allowedTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);

@@ -7,10 +7,10 @@ export const validate = (schema: Schema) => {
     const { error } = schema.validate(req.body);
     
     if (error) {
-      logger.warn(`Validation error: ${error.details[0].message}`);
+      logger.warn(`Validation error: ${error.details?.[0]?.message || 'Unknown validation error'}`);
       return res.status(400).json({
         message: 'Validation error',
-        details: error.details[0].message
+        details: error.details?.[0]?.message || 'Validation failed'
       });
     }
     
@@ -23,10 +23,10 @@ export const validateQuery = (schema: Schema) => {
     const { error } = schema.validate(req.query);
     
     if (error) {
-      logger.warn(`Query validation error: ${error.details[0].message}`);
+      logger.warn(`Query validation error: ${error.details?.[0]?.message || 'Unknown validation error'}`);
       return res.status(400).json({
         message: 'Query validation error',
-        details: error.details[0].message
+        details: error.details?.[0]?.message || 'Validation failed'
       });
     }
     
@@ -39,10 +39,10 @@ export const validateParams = (schema: Schema) => {
     const { error } = schema.validate(req.params);
     
     if (error) {
-      logger.warn(`Params validation error: ${error.details[0].message}`);
+      logger.warn(`Params validation error: ${error.details?.[0]?.message || 'Unknown validation error'}`);
       return res.status(400).json({
         message: 'Params validation error',
-        details: error.details[0].message
+        details: error.details?.[0]?.message || 'Validation failed'
       });
     }
     

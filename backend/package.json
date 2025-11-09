@@ -1,14 +1,20 @@
 {
   "name": "cardify-backend",
   "version": "1.0.0",
-  "description": "Cardify backend API",
-  "main": "dist/server.js",
+  "description": "Cardify Express API with TypeScript",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/index.ts",
     "build": "rm -rf dist && tsc",
-    "build:full": "rm -rf dist && tsc",
-    "postbuild": "ls -la dist/"
+    "build:watch": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "clean": "rm -rf dist",
+    "postbuild": "echo '✅ Build completed successfully' && ls -la dist/",
+    "healthcheck": "curl -f http://localhost:${PORT:-10000}/api/health || exit 1"
   },
   "dependencies": {
     "axios": "^1.13.1",

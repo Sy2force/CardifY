@@ -33,38 +33,36 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-// Modèle carte professionnelle - Structure et validation des cartes
 const mongoose_1 = __importStar(require("mongoose"));
-// Schéma MongoDB avec validations complètes
 const CardSchema = new mongoose_1.Schema({
     title: {
         type: String,
         required: [true, 'Le titre est requis'],
-        minlength: 2, // Min 2 caractères
-        maxlength: 100, // Max 100 caractères
-        trim: true // Supprime espaces début/fin
+        minlength: 2,
+        maxlength: 100,
+        trim: true
     },
     subtitle: {
         type: String,
         minlength: 2,
         maxlength: 100,
-        trim: true // Profession/Poste
+        trim: true
     },
     description: {
         type: String,
         minlength: 2,
-        maxlength: 1000, // Description longue autorisée
+        maxlength: 1000,
         trim: true
     },
     phone: {
         type: String,
         required: [true, 'Le téléphone est requis'],
-        match: [/^[+]?[1-9][\d]{0,15}$/, 'Format téléphone invalide'] // Format international
+        match: [/^[+]?[1-9][\d]{0,15}$/, 'Format téléphone invalide']
     },
     email: {
         type: String,
         required: [true, 'L\'email est requis'],
-        lowercase: true, // Conversion auto en minuscules
+        lowercase: true,
         match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Format email invalide']
     },
     web: {
@@ -72,8 +70,8 @@ const CardSchema = new mongoose_1.Schema({
         validate: {
             validator: function (v) {
                 if (!v || v === '')
-                    return true; // Autorise les chaînes vides
-                return /^https?:\/\/.+/.test(v); // Doit commencer par http(s)://
+                    return true;
+                return /^https?:\/\/.+/.test(v);
             },
             message: 'URL invalide (doit commencer par http:// ou https://)'
         }
@@ -81,7 +79,7 @@ const CardSchema = new mongoose_1.Schema({
     image: {
         url: {
             type: String,
-            default: 'https://cdn.pixabay.com/photo/2016/04/01/10/11/avatar-1299805_960_720.png' // Image par défaut
+            default: 'https://cdn.pixabay.com/photo/2016/04/01/10/11/avatar-1299805_960_720.png'
         },
         alt: {
             type: String,
@@ -91,66 +89,64 @@ const CardSchema = new mongoose_1.Schema({
     address: {
         state: {
             type: String,
-            maxlength: 50 // État/Région
+            maxlength: 50
         },
         country: {
             type: String,
             minlength: 2,
-            maxlength: 50 // Pays
+            maxlength: 50
         },
         city: {
             type: String,
             minlength: 2,
-            maxlength: 50 // Ville
+            maxlength: 50
         },
         street: {
             type: String,
             minlength: 2,
-            maxlength: 100 // Rue
+            maxlength: 100
         },
         houseNumber: {
             type: String,
             minlength: 1,
-            maxlength: 20 // Numéro de rue
+            maxlength: 20
         },
         zip: {
             type: String,
-            maxlength: 10 // Code postal
+            maxlength: 10
         }
     },
     bizNumber: {
         type: Number,
-        unique: true, // Index unique en DB
-        min: 1000000, // 7 chiffres minimum
-        max: 9999999 // 7 chiffres maximum
+        unique: true,
+        min: 1000000,
+        max: 9999999
     },
     likes: [{
             type: mongoose_1.Schema.Types.ObjectId,
-            ref: 'User' // Référence vers User
+            ref: 'User'
         }],
     user_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
-        required: true // Obligatoire
+        required: true
     }
 }, {
-    timestamps: true // Ajoute createdAt et updatedAt
+    timestamps: true
 });
-// Middleware : génération automatique d'un numéro business unique
 CardSchema.pre('save', async function (next) {
     if (this.bizNumber)
-        return next(); // Skip si déjà défini
+        return next();
     try {
         let bizNumber;
         let isUnique = false;
-        // Boucle jusqu'à trouver un numéro unique
         while (!isUnique) {
-            bizNumber = Math.floor(Math.random() * (9999999 - 1000000 + 1)) + 1000000; // 7 chiffres aléatoires
+            bizNumber = Math.floor(Math.random() * (9999999 - 1000000 + 1)) + 1000000;
             const CardModel = this.constructor;
             const existingCard = await CardModel.findOne({ bizNumber });
             if (!existingCard) {
                 isUnique = true;
-                this.bizNumber = bizNumber; // Attribution du numéro unique
+                this.bizNumber = bizNumber;
             }
         }
         next();
@@ -159,5 +155,4 @@ CardSchema.pre('save', async function (next) {
         next(error);
     }
 });
-// Export du modèle Mongoose
 exports.default = mongoose_1.default.model('Card', CardSchema);

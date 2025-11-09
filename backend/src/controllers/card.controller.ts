@@ -29,7 +29,7 @@ export const createCard = async (req: AuthRequest, res: Response): Promise<Respo
     const { error } = createCardSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ 
-        message: error.details[0].message 
+        message: error.details?.[0]?.message || 'Validation error' 
       });
     }
 
@@ -152,7 +152,7 @@ export const updateCard = async (req: AuthRequest, res: Response): Promise<Respo
     const { error } = updateCardSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ 
-        message: error.details[0].message 
+        message: error.details?.[0]?.message || 'Validation error' 
       });
     }
 
@@ -220,7 +220,10 @@ export const deleteCard = async (req: AuthRequest, res: Response): Promise<Respo
 };
 
 export const likeCard = async (req: AuthRequest, res: Response): Promise<Response | void> => {
-  const cardId: string = req.params.id;
+  const cardId = req.params.id;
+  if (!cardId) {
+    return res.status(400).json({ message: 'Card ID is required' });
+  }
   const userId = req.user?._id;
 
   if (!userId) {

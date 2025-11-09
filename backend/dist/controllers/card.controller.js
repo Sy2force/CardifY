@@ -9,7 +9,6 @@ const card_validation_1 = require("../validations/card.validation");
 const logger_1 = require("../services/logger");
 const createCard = async (req, res) => {
     try {
-        // Check if user is business user
         if (!req.user?.isBusiness) {
             return res.status(403).json({
                 message: 'Business account required to create cards'
@@ -18,7 +17,7 @@ const createCard = async (req, res) => {
         const { error } = card_validation_1.createCardSchema.validate(req.body);
         if (error) {
             return res.status(400).json({
-                message: error.details[0].message
+                message: error.details?.[0]?.message || 'Validation error'
             });
         }
         const cardData = {
@@ -134,7 +133,7 @@ const updateCard = async (req, res) => {
         const { error } = card_validation_1.updateCardSchema.validate(req.body);
         if (error) {
             return res.status(400).json({
-                message: error.details[0].message
+                message: error.details?.[0]?.message || 'Validation error'
             });
         }
         const cardId = req.params.id;
@@ -190,6 +189,9 @@ const deleteCard = async (req, res) => {
 exports.deleteCard = deleteCard;
 const likeCard = async (req, res) => {
     const cardId = req.params.id;
+    if (!cardId) {
+        return res.status(400).json({ message: 'Card ID is required' });
+    }
     const userId = req.user?._id;
     if (!userId) {
         return res.status(401).json({ message: 'User not authenticated' });
@@ -201,11 +203,9 @@ const likeCard = async (req, res) => {
         }
         const isLiked = card.likes.some((id) => id.toString() === userId);
         if (isLiked) {
-            // Unlike the card
             card.likes = card.likes.filter(id => id.toString() !== userId);
         }
         else {
-            // Like the card
             card.likes.push(userId);
         }
         await card.save();
