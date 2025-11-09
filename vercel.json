@@ -36,6 +36,10 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
         }
       ]
     }
@@ -43,7 +47,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://cardify-backend-production.onrender.com/api/$1"
+      "destination": "https://cardify-backend.onrender.com/api/$1"
     }
   ],
   "redirects": [

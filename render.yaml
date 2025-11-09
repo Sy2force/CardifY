@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: cardify-backend-production
+    name: cardify-backend
     env: node
     rootDir: ./backend
-    buildCommand: npm ci && npm run build && npm run postbuild:cleanup
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     plan: free
     region: oregon
@@ -14,7 +14,6 @@ services:
       paths:
         - backend/**
         - render.yaml
-        - package*.json
     envVars:
       - key: NODE_ENV
         value: production
