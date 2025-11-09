@@ -13,8 +13,18 @@ const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 
+// Health check routes
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
+});
+
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({ 
+    status: "ok",
+    message: "Cardify API is running",
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || "development"
+  });
 });
 
 app.listen(PORT, () => {
