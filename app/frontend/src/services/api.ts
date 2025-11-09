@@ -32,6 +32,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Log détaillé pour debug
+    // eslint-disable-next-line no-console
     console.error('Erreur API:', {
       url: error.config?.url,
       method: error.config?.method,

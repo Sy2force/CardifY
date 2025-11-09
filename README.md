@@ -1,19 +1,21 @@
-# 🃏 Cardify - Digital Business Cards Platform
+# Cardify - Digital Business Cards Platform
 
 Modern, responsive platform for creating and sharing digital business cards.
 
-## 📁 Project Structure
+## Project Structure
 
-```
-app/
-├── frontend/          # React + Vite frontend
-│   ├── src/
-│   │   ├── components/    # Reusable UI components
-│   │   ├── pages/         # Application pages
-│   │   ├── context/       # React contexts
-│   │   ├── hooks/         # Custom hooks
-│   │   ├── services/      # API services
-│   │   ├── types/         # TypeScript types
+```text
+cardify/
+├── backend/              # API Express + TypeScript (Render)
+│   ├── src/index.ts     # Point d'entrée minimal
+│   ├── dist/            # JavaScript compilé
+│   └── package.json     # Scripts build/start
+├── app/frontend/        # React + Vite + TypeScript (Vercel)
+│   ├── src/             # Code source React
+│   ├── dist/            # Build de production
+│   └── package.json     # Scripts frontend
+├── render.yaml          # Configuration Render
+└── vercel.json          # Configuration Vercel
 ```
 
 ## Configuration de Déploiement
@@ -21,14 +23,17 @@ app/
 ### Backend (Render)
 
 **Scripts:**
+
 - `npm run build` → Compile TypeScript vers `dist/index.js`
 - `npm start` → Lance `node dist/index.js`
 
 **Endpoints:**
+
 - `/health` → Health check simple
 - `/api/health` → Health check détaillé avec timestamp
 
 **Variables d'environnement:**
+
 - `NODE_ENV=production`
 - `PORT=8080`
 - `MONGO_URI=mongodb+srv://...`
@@ -41,6 +46,7 @@ app/
 **Output:** `app/frontend/dist`
 
 **Variables d'environnement:**
+
 - `VITE_API_URL=https://your-backend.onrender.com`
 
 **Proxy API:** `/api/*` → Backend Render
@@ -100,7 +106,7 @@ npm run preview
 
 ## Test Accounts
 
-```
+```text
 Admin:    admin@cardify.com / admin123
 Business: sarah@example.com / business123
 User:     john@example.com / user123
@@ -108,4 +114,4 @@ User:     john@example.com / user123
 
 ---
 
-**✨ Clean, organized, production-ready codebase**
+## ✨ Clean, organized, production-ready codebase
